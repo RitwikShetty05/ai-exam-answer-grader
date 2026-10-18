@@ -426,6 +426,18 @@ def scale_score(score_out_of_5, maximum_marks):
     return round_to_half(score_out_of_5 / 5 * maximum_marks)
 
 
+def similarity_only_result(result, b3_score, maximum_marks, reason, start):
+    result["score"] = scale_score(b3_score, maximum_marks)
+    result["feedback"] = "Detailed feedback is unavailable because the LLM grader could not be used; this score comes from the similarity model only."
+    result["confidence"] = round(confidence_settings["similarity_only_confidence"], 2)
+    result["grading_mode"] = "similarity_only"
+    result["scores_out_of_5"] = {"similarity_model": round(b3_score, 2), "final": round(b3_score, 2)}
+    result["review_reasons"].append(reason)
+    result["needs_human_review"] = True
+    result["seconds"] = round(time.time() - start, 2)
+    return result
+
+
 def evaluate_answer(question_text, reference_answer, student_answer, maximum_marks=5, rubric=None, question_id=None, student_id=None, ocr_confidence=None):
     start = time.time()
     if str(question_text).strip() == "" or str(reference_answer).strip() == "":
@@ -469,18 +481,13 @@ def evaluate_answer(question_text, reference_answer, student_answer, maximum_mar
     b3_score = similarity_score(reference_answer, student_answer)
 
     if not llm_is_available():
-        result["score"] = scale_score(b3_score, maximum_marks)
-        result["feedback"] = "Detailed feedback is unavailable because the LLM grader is not running; this score comes from the similarity model only."
-        result["confidence"] = round(confidence_settings["similarity_only_confidence"], 2)
-        result["grading_mode"] = "similarity_only"
-        result["scores_out_of_5"] = {"similarity_model": round(b3_score, 2), "final": round(b3_score, 2)}
-        review_reasons.append("LLM grader unavailable: the score comes from the similarity model only.")
-        result["needs_human_review"] = True
-        result["seconds"] = round(time.time() - start, 2)
-        return result
+        return similarity_only_result(result, b3_score, maximum_marks, "LLM grader unavailable: the score comes from the similarity model only.", start)
 
-    concepts, rubric_source = get_rubric(question_text, reference_answer, rubric)
-    graded = llm_grade(question_text, reference_answer, concepts, student_answer)
+    try:
+        concepts, rubric_source = get_rubric(question_text, reference_answer, rubric)
+        graded = llm_grade(question_text, reference_answer, concepts, student_answer)
+    except RuntimeError as error:
+        return similarity_only_result(result, b3_score, maximum_marks, "The LLM grader failed (" + str(error)[:120] + "): the score comes from the similarity model only.", start)
     b2_score = calibrate(graded["llm_score"], graded["rubric_score"])
     final_score = (b3_score + b2_score) / 2
     llm_rubric_gap = abs(graded["llm_score"] - graded["rubric_score"])
