@@ -3,6 +3,7 @@ import json
 import requests
 import pandas as pd
 import streamlit as st
+import charts
 
 FOLDER = os.path.dirname(os.path.abspath(__file__))
 
@@ -18,6 +19,17 @@ GRADER_MODE = os.environ.get("GRADER_MODE", "api")
 
 with open(os.path.join(FOLDER, "demo exam.json")) as file:
     demo_exam = json.load(file)
+
+
+@st.cache_data
+def load_evaluation():
+    with open(os.path.join(FOLDER, "results", "week 6 chart summary.json")) as file:
+        summary = json.load(file)
+    data = pd.read_csv(os.path.join(FOLDER, "results", "week 6 chart data.csv"))
+    return summary, data
+
+
+evaluation_summary, evaluation_data = load_evaluation()
 
 
 @st.cache_resource
@@ -104,7 +116,7 @@ else:
 status_labels = {"present": "✅ present", "partial": "🟡 partial", "missing": "❌ missing"}
 
 
-def show_result(result, human_mark=None):
+def show_result(result, human_mark=None, key_prefix="single"):
     columns = st.columns(4)
     columns[0].metric("Recommended score", str(result["score"]) + " / " + str(result["maximum_score"]))
     columns[1].metric("Confidence", str(round(result["confidence"] * 100)) + "%")
@@ -134,6 +146,15 @@ def show_result(result, human_mark=None):
         st.markdown("**Statements the LLM judged to be wrong**")
         for statement in result["wrong_statements"]:
             st.error("❌ " + statement)
+    if result["grading_mode"] == "full" and "rubric_before_penalty" in result["scores_out_of_5"]:
+        st.markdown("**📈 Behind this mark**")
+        chart_columns = st.columns(2)
+        with chart_columns[0]:
+            st.plotly_chart(charts.score_waterfall(result["scores_out_of_5"]), theme=None, key=key_prefix + " waterfall")
+            st.caption("Each bar is one real step of the calculation on a 0–5 scale. The final mark is then scaled to the maximum marks and rounded to 0.5. The similarity model alone gave " + str(result["scores_out_of_5"]["similarity_model"]) + " out of 5.")
+        with chart_columns[1]:
+            st.plotly_chart(charts.confidence_check(evaluation_summary["reliability"], result["confidence"]), theme=None, key=key_prefix + " confidence")
+            st.caption(charts.reliability_text(evaluation_summary["reliability"], result["confidence"]))
     with st.expander("Score details (0–5 scale) and raw JSON response"):
         st.write("Grading mode: " + result["grading_mode"] + " | time: " + str(result["seconds"]) + " seconds")
         st.json(result)
@@ -175,7 +196,7 @@ if "question_text" not in st.session_state:
 st.title(":blue[📝 AI Exam Answer Grader]")
 st.caption("Recommends a mark, feedback and a confidence score by checking a student's answer against the reference answer and a marking rubric. A teacher makes the final decision.")
 
-single_tab, batch_tab, api_tab = st.tabs(["✏️ Grade one answer", "📄 Grade answer sheets (Group 1 format)", "🔌 Use the API"])
+single_tab, batch_tab, results_tab, api_tab = st.tabs(["✏️ Grade one answer", "📄 Grade answer sheets (Group 1 format)", "📊 Evaluation results", "🔌 Use the API"])
 
 with single_tab:
     st.subheader("Grade one answer")
@@ -224,21 +245,34 @@ with single_tab:
         human_mark = st.session_state.get("human_mark")
         if human_mark is not None:
             human_mark = round(human_mark / 5 * st.session_state["maximum_marks"], 2)
-        show_result(st.session_state["single_result"], human_mark)
+        show_result(st.session_state["single_result"], human_mark, "single")
 
-with batch_tab:
-    st.subheader("Grade answer sheets in Group 1's digitizer format")
-    st.write("Each answer is a record with student_id, question, answer_text, page and confidence (the output format of Group 1's Handwritten Exam Digitizer). An answer key gives the question, reference answer and maximum marks for each question label.")
-    source = st.radio("Answers to grade", ["Sample exam built from the Mohler dataset", "Upload a JSON file"], horizontal=True)
-    exam = demo_exam
-    if source == "Upload a JSON file":
-        uploaded = st.file_uploader("JSON file with 'answer_key' and 'answers' (same layout as demo exam.json)", type="json")
-        if uploaded is None:
-            st.stop()
-        exam = json.load(uploaded)
-    else:
-        st.caption(demo_exam["description"])
+def batch_overview(batch_result, human_marks):
+    st.markdown("**📊 Batch overview**")
+    corridor_human = []
+    corridor_model = []
+    corridor_hover = []
+    for result in batch_result["results"]:
+        key = str(result["student_id"]) + " " + str(result["question"])
+        if human_marks.get(key) is not None:
+            corridor_human.append(human_marks[key] / result["maximum_score"] * 5)
+            corridor_model.append(result["score"] / result["maximum_score"] * 5)
+            corridor_hover.append(key + "<br>human " + str(human_marks[key]) + " / " + str(result["maximum_score"]) + "<br>grader " + str(result["score"]) + " / " + str(result["maximum_score"]))
+    overview_columns = st.columns(2)
+    with overview_columns[0]:
+        if len(corridor_human) > 0:
+            st.plotly_chart(charts.corridor(corridor_human, corridor_model, corridor_hover, "Grader vs human marks (scaled to 5)", height=420), theme=None, key="batch corridor")
+            st.caption("Dots inside the blue band are within ±1 mark (on a 5-mark scale) of the human mark.")
+        else:
+            st.info("No human marks in this file, so the agreement chart is not shown.")
+    with overview_columns[1]:
+        st.plotly_chart(charts.batch_routing(batch_result["results"]), theme=None, key="batch routing")
+        st.caption("Answers marked automatically, and the reason each other answer was sent to the teacher.")
+    st.plotly_chart(charts.batch_concepts(batch_result["results"]), theme=None, key="batch concepts")
+    st.caption("How many rubric points were present, partly present or missing across all students, per question: a quick view of class-wide gaps.")
 
+
+def batch_section(exam):
     with st.expander("Answer key"):
         key_rows = []
         for label, item in exam["answer_key"].items():
@@ -251,42 +285,128 @@ with batch_tab:
             st.session_state["batch_result"] = call_api("/evaluate-batch", {"answer_key": exam["answer_key"], "answers": exam["answers"]})
 
     batch_result = st.session_state.get("batch_result")
-    if batch_result is not None:
-        st.write(str(batch_result["answers_graded"]) + " answers graded, " + str(batch_result["answers_needing_review"]) + " marked for teacher review.")
-        human_marks = exam.get("human_marks", {})
-        result_rows = []
-        for result in batch_result["results"]:
-            if result["needs_human_review"]:
-                status = "⚠️ Review"
-            else:
-                status = "✅ OK"
-            result_rows.append({
-                "Status": status,
-                "Student": result["student_id"],
-                "Question": result["question"],
-                "Recommended": result["score"],
-                "Out of": result["maximum_score"],
-                "Confidence": result["confidence"],
-                "Needs review": result["needs_human_review"],
-                "Human mark (dataset)": human_marks.get(str(result["student_id"]) + " " + str(result["question"])),
-                "Teacher's final mark": result["score"],
-                "Teacher comment": "",
-            })
-        st.markdown("**Teacher review** — edit the final mark and comment; only the last two columns can be changed.")
-        reviewed = st.data_editor(
-            pd.DataFrame(result_rows),
-            hide_index=True,
-            disabled=["Status", "Student", "Question", "Recommended", "Out of", "Confidence", "Needs review", "Human mark (dataset)"],
-            column_config={"Confidence": st.column_config.ProgressColumn("Confidence", min_value=0.0, max_value=1.0, format="%.2f")},
-        )
-        st.download_button("Download the reviewed marks (CSV)", reviewed.to_csv(index=False), file_name="reviewed marks.csv", mime="text/csv")
+    if batch_result is None:
+        return
+    st.write(str(batch_result["answers_graded"]) + " answers graded, " + str(batch_result["answers_needing_review"]) + " marked for teacher review.")
+    human_marks = exam.get("human_marks", {})
+    result_rows = []
+    for result in batch_result["results"]:
+        if result["needs_human_review"]:
+            status = "⚠️ Review"
+        else:
+            status = "✅ OK"
+        result_rows.append({
+            "Status": status,
+            "Student": result["student_id"],
+            "Question": result["question"],
+            "Recommended": result["score"],
+            "Out of": result["maximum_score"],
+            "Confidence": result["confidence"],
+            "Needs review": result["needs_human_review"],
+            "Human mark (dataset)": human_marks.get(str(result["student_id"]) + " " + str(result["question"])),
+            "Teacher's final mark": result["score"],
+            "Teacher comment": "",
+        })
+    st.markdown("**Teacher review** — edit the final mark and comment; only the last two columns can be changed.")
+    reviewed = st.data_editor(
+        pd.DataFrame(result_rows),
+        hide_index=True,
+        disabled=["Status", "Student", "Question", "Recommended", "Out of", "Confidence", "Needs review", "Human mark (dataset)"],
+        column_config={"Confidence": st.column_config.ProgressColumn("Confidence", min_value=0.0, max_value=1.0, format="%.2f")},
+    )
+    st.download_button("Download the reviewed marks (CSV)", reviewed.to_csv(index=False), file_name="reviewed marks.csv", mime="text/csv")
 
-        detail_labels = []
-        for result in batch_result["results"]:
-            detail_labels.append(str(result["student_id"]) + " — " + str(result["question"]))
-        chosen = st.selectbox("Show the full feedback for", detail_labels)
-        chosen_result = batch_result["results"][detail_labels.index(chosen)]
-        show_result(chosen_result, human_marks.get(str(chosen_result["student_id"]) + " " + str(chosen_result["question"])))
+    batch_overview(batch_result, human_marks)
+
+    detail_labels = []
+    for result in batch_result["results"]:
+        detail_labels.append(str(result["student_id"]) + " — " + str(result["question"]))
+    chosen = st.selectbox("Show the full feedback for", detail_labels)
+    chosen_result = batch_result["results"][detail_labels.index(chosen)]
+    show_result(chosen_result, human_marks.get(str(chosen_result["student_id"]) + " " + str(chosen_result["question"])), "batch")
+
+
+with batch_tab:
+    st.subheader("Grade answer sheets in Group 1's digitizer format")
+    st.write("Each answer is a record with student_id, question, answer_text, page and confidence (the output format of Group 1's Handwritten Exam Digitizer). An answer key gives the question, reference answer and maximum marks for each question label.")
+    source = st.radio("Answers to grade", ["Sample exam built from the Mohler dataset", "Upload a JSON file"], horizontal=True)
+    if source == "Upload a JSON file":
+        uploaded = st.file_uploader("JSON file with 'answer_key' and 'answers' (same layout as demo exam.json)", type="json")
+        if uploaded is not None:
+            batch_section(json.load(uploaded))
+    else:
+        st.caption(demo_exam["description"])
+        batch_section(demo_exam)
+
+
+def show_evaluation_results():
+    st.subheader("How well does the grader work?")
+    st.caption("All results come from the Week 5 & 6 evaluation: 450 Mohler answers to questions the models had never seen, weighted so they represent all 2,254 answers. These are measured results, not demo examples.")
+    final_mae = None
+    for row in evaluation_summary["benchmark"]:
+        if row["method"].startswith("B5 v2"):
+            final_mae = row["mae"]
+    tiles = st.columns(4)
+    tiles[0].metric("Average error (out of 5)", str(round(final_mae, 2)) + " marks")
+    tiles[1].metric("Within ±1 mark of the teachers", str(round(evaluation_summary["within_one_weighted"])) + "%")
+    tiles[2].metric("Sent to a teacher", str(round(evaluation_summary["review_share"], 1)) + "%", "catches " + str(round(evaluation_summary["large_errors_caught"])) + "% of large errors", delta_color="off")
+    tiles[3].metric("Two teachers differ by", str(round(evaluation_summary["human_ai"]["Teacher 2 vs teacher 1"], 2)) + " marks")
+
+    st.markdown("### 1. How accurate is it?")
+    st.plotly_chart(charts.benchmark(evaluation_summary["benchmark"]), theme=None, key="results benchmark")
+    st.caption("Lower is better. The two LLM-based models have the lowest errors: B2 v2 has the lowest MAE (0.553) and the final grader B5 v2 the lowest RMSE (0.766), so it makes fewer big mistakes. The difference between them is small.")
+    corridor_hover = []
+    for i, row in evaluation_data.iterrows():
+        corridor_hover.append(str(row["question"])[:60] + "<br>human " + str(row["human_score"]) + " | grader " + str(round(row["pred_B5_v2"], 2)))
+    note = "450 sampled answers; weak answers are over-represented, so " + str(round(evaluation_summary["within_one_sample"])) + "% of these dots are inside the band. " + str(round(evaluation_summary["within_one_weighted"], 1)) + "% is the weighted estimate for all answers."
+    st.plotly_chart(charts.corridor(evaluation_data["human_score"], evaluation_data["pred_B5_v2"], corridor_hover, str(round(evaluation_summary["within_one_weighted"])) + "% of answers fall within ±1 mark of the teachers", note=note, height=540), theme=None, key="results corridor")
+
+    st.markdown("### 2. Where does it struggle?")
+    st.plotly_chart(charts.quality(evaluation_summary["quality"], evaluation_summary["band_order"]), theme=None, key="results quality")
+    st.caption("Similarity models struggle on weak answers (B3: 1.50 marks off) because a wrong answer can use the right words. The LLM, which checks correctness, is best there (1.02); the final grader is best on strong answers.")
+    st.plotly_chart(charts.human_ai_box(evaluation_data, evaluation_summary["human_ai"]), theme=None, key="results human ai")
+    st.caption("Two teachers differ by 0.72 marks on average. The final grader is 0.60 marks from teacher 2 and 0.82 from teacher 1, the stricter one. It was trained on the average of both teachers, which favours it, so this does not prove it is as good as a teacher.")
+
+    st.markdown("### 3. Can we trust it?")
+    st.plotly_chart(charts.reliability(evaluation_summary["reliability"]), theme=None, key="results reliability")
+    st.caption("If the confidence were perfect, every point would sit on the dotted line. High confidence is honest; the small low-confidence group (4.5% of answers) is right only 27% of the time, which is why those answers go to a teacher.")
+    st.plotly_chart(charts.routing_sankey(evaluation_summary["routing_shares"], evaluation_summary["large_errors_caught"]), theme=None, key="results routing")
+    st.caption("Answers meeting several rules are counted under the first. No real Mohler answer contained instruction-like text, so that rule sends 0% here. In the robustness tests, the review rules sent all 10 injections that raised the LLM's mark to a teacher (a rule designed after seeing those tests).")
+    robustness_columns = st.columns(2)
+    with robustness_columns[0]:
+        st.plotly_chart(charts.robustness_changes(evaluation_summary["robustness_perturbations"], evaluation_summary["robustness_injection"]), theme=None, key="results robustness changes")
+        st.caption("Spelling mistakes and padding cost LLM marks; cutting an answer to 3 words lowers every model, as it should.")
+    with robustness_columns[1]:
+        st.plotly_chart(charts.robustness_fake(evaluation_summary["robustness_sanity"]), theme=None, key="results robustness fake")
+        st.caption("A list of keywords fools the similarity model (4.81 out of 5); the LLM gives it much less (2.91), but still 4.5 to 4 of the 11 lists.")
+
+    st.markdown("### 4. Under the hood")
+    st.plotly_chart(charts.calibration(evaluation_summary["calibration_isotonic"], evaluation_summary["calibration_week5_line"]), theme=None, key="results calibration")
+    st.caption("The LLM marks much more strictly than the Mohler teachers, so its score is mapped to their scale. Both mappings start near 2.8, because answers the LLM scores 0 averaged about 2.8 from the teachers.")
+    failure = evaluation_summary["examples"]["Wrong answer on the right topic (known failure)"]
+    st.markdown("**Known failure (handout Part G): a wrong answer on the right topic**")
+    failure_columns = st.columns([1, 1.2])
+    with failure_columns[0]:
+        st.write("**Question:** " + failure["question_text"])
+        st.write("**Student:** \"" + failure["student_answer"] + "\"")
+        st.error("Teachers gave " + str(failure["human_mark"]) + " / 5. The grader gave " + str(failure["score"]) + " / 5 with " + str(round(failure["confidence"] * 100)) + "% confidence and no review flag.")
+        st.write("**Why:** the LLM is right (\"first in last out\" describes a stack) and gives 0, but the similarity model sees the reference's words and gives " + str(round(failure["scores_out_of_5"]["similarity_model"], 1)) + ", and calibration turns the LLM's 0 into " + str(round(failure["scores_out_of_5"]["llm_calibrated"], 1)) + ". The two scores agree, so confidence stays high.")
+    with failure_columns[1]:
+        st.plotly_chart(charts.failure_bars(failure), theme=None, key="results failure")
+
+    st.markdown("### 5. The data")
+    data_columns = st.columns([1.3, 1])
+    with data_columns[0]:
+        st.plotly_chart(charts.topics_treemap(evaluation_summary["topics"]), theme=None, key="results topics")
+    with data_columns[1]:
+        st.image(os.path.join(FOLDER, "results", "charts", "word cloud.png"), caption="Most frequent words in the questions and reference answers", width="stretch")
+    st.plotly_chart(charts.concepts_by_topic(evaluation_data), theme=None, key="results concepts")
+    st.caption("For each evaluated answer, the LLM's check of every rubric point, grouped by topic (weighted). Topics are assigned by keywords in the question.")
+
+
+with results_tab:
+    show_evaluation_results()
+
 
 with api_tab:
     st.subheader("Use the grader from another application")

@@ -374,6 +374,7 @@ def llm_grade(question_text, reference_answer, concepts, student_answer):
         if status == "missing":
             evidence = ""
         concept_results.append({"concept": concepts[number], "status": status, "evidence": evidence})
+    rubric_score_before_penalty = round_to_half(5 * earned / len(concepts))
     earned = max(earned - 0.5 * len(wrong_statements), 0.0)
     rubric_score = round_to_half(5 * earned / len(concepts))
     llm_score = round_to_half(np.clip(float(parsed.get("score", 0)), 0, 5))
@@ -381,6 +382,7 @@ def llm_grade(question_text, reference_answer, concepts, student_answer):
     return {
         "llm_score": llm_score,
         "rubric_score": rubric_score,
+        "rubric_score_before_penalty": rubric_score_before_penalty,
         "concepts": concept_results,
         "wrong_statements": wrong_statements,
         "llm_feedback": str(parsed.get("feedback", "")).strip(),
@@ -509,7 +511,10 @@ def evaluate_answer(question_text, reference_answer, student_answer, maximum_mar
     result["scores_out_of_5"] = {
         "similarity_model": round(b3_score, 2),
         "llm": graded["llm_score"],
+        "rubric_before_penalty": graded["rubric_score_before_penalty"],
+        "wrong_statement_penalty": graded["rubric_score"] - graded["rubric_score_before_penalty"],
         "rubric": graded["rubric_score"],
+        "llm_rubric_average": (graded["llm_score"] + graded["rubric_score"]) / 2,
         "llm_calibrated": round(b2_score, 2),
         "final": round(final_score, 2),
     }

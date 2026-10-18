@@ -4,3 +4,5 @@ __pycache__/
 *.docx
 *.pdf
 .ipynb_checkpoints/
+*.zip
+demo screenshots/

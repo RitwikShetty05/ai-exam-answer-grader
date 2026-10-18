@@ -6,6 +6,7 @@
       "status": "ok",
       "similarity_model_loaded": true,
       "llm_available": true,
+      "llm_provider": "ollama",
       "llm_model": "qwen2.5:7b-instruct",
       "version": "week 6"
     }
@@ -72,11 +73,14 @@
       "scores_out_of_5": {
         "similarity_model": 4.93,
         "llm": 3.0,
+        "rubric_before_penalty": 4.0,
+        "wrong_statement_penalty": -1.5,
         "rubric": 2.5,
+        "llm_rubric_average": 2.75,
         "llm_calibrated": 4.41,
         "final": 4.67
       },
-      "seconds": 8.48
+      "seconds": 8.3
     }
   },
   "POST /evaluate-batch": {
@@ -200,11 +204,14 @@
           "scores_out_of_5": {
             "similarity_model": 4.92,
             "llm": 2.5,
+            "rubric_before_penalty": 3.5,
+            "wrong_statement_penalty": -1.0,
             "rubric": 2.5,
+            "llm_rubric_average": 2.5,
             "llm_calibrated": 4.41,
             "final": 4.66
           },
-          "seconds": 9.27
+          "seconds": 9.22
         },
         {
           "question": "Q1",
@@ -241,11 +248,14 @@
           "scores_out_of_5": {
             "similarity_model": 3.81,
             "llm": 0.0,
+            "rubric_before_penalty": 0.0,
+            "wrong_statement_penalty": 0.0,
             "rubric": 0.0,
+            "llm_rubric_average": 0.0,
             "llm_calibrated": 2.76,
             "final": 3.29
           },
-          "seconds": 6.35
+          "seconds": 8.4
         },
         {
           "question": "Q2",
@@ -274,11 +284,14 @@
           "scores_out_of_5": {
             "similarity_model": 0.93,
             "llm": 1.5,
+            "rubric_before_penalty": 2.5,
+            "wrong_statement_penalty": -2.5,
             "rubric": 0.0,
+            "llm_rubric_average": 0.75,
             "llm_calibrated": 2.76,
             "final": 1.85
           },
-          "seconds": 4.7
+          "seconds": 6.93
         },
         {
           "question": "Q2",
@@ -303,11 +316,14 @@
           "scores_out_of_5": {
             "similarity_model": 4.94,
             "llm": 4.5,
+            "rubric_before_penalty": 5.0,
+            "wrong_statement_penalty": 0.0,
             "rubric": 5.0,
+            "llm_rubric_average": 4.75,
             "llm_calibrated": 4.79,
             "final": 4.87
           },
-          "seconds": 4.59
+          "seconds": 6.43
         },
         {
           "question": "Q3",
@@ -332,11 +348,14 @@
           "scores_out_of_5": {
             "similarity_model": 4.94,
             "llm": 5.0,
+            "rubric_before_penalty": 5.0,
+            "wrong_statement_penalty": 0.0,
             "rubric": 5.0,
+            "llm_rubric_average": 5.0,
             "llm_calibrated": 4.98,
             "final": 4.96
           },
-          "seconds": 3.77
+          "seconds": 4.01
         },
         {
           "question": "Q3",
@@ -363,11 +382,14 @@
           "scores_out_of_5": {
             "similarity_model": 1.77,
             "llm": 0.0,
+            "rubric_before_penalty": 0.0,
+            "wrong_statement_penalty": 0.0,
             "rubric": 0.0,
+            "llm_rubric_average": 0.0,
             "llm_calibrated": 2.76,
             "final": 2.26
           },
-          "seconds": 3.77
+          "seconds": 3.83
         },
         {
           "question": "Q4",
@@ -394,11 +416,14 @@
           "scores_out_of_5": {
             "similarity_model": 2.85,
             "llm": 2.0,
+            "rubric_before_penalty": 0.0,
+            "wrong_statement_penalty": 0.0,
             "rubric": 0.0,
+            "llm_rubric_average": 1.0,
             "llm_calibrated": 3.28,
             "final": 3.06
           },
-          "seconds": 4.23
+          "seconds": 4.58
         },
         {
           "question": "Q4",
@@ -423,11 +448,14 @@
           "scores_out_of_5": {
             "similarity_model": 4.95,
             "llm": 5.0,
+            "rubric_before_penalty": 5.0,
+            "wrong_statement_penalty": 0.0,
             "rubric": 5.0,
+            "llm_rubric_average": 5.0,
             "llm_calibrated": 4.98,
             "final": 4.97
           },
-          "seconds": 4.91
+          "seconds": 4.81
         }
       ],
       "answers_graded": 8,
@@ -470,11 +498,14 @@
       "scores_out_of_5": {
         "similarity_model": 4.67,
         "llm": 2.5,
+        "rubric_before_penalty": 2.5,
+        "wrong_statement_penalty": 0.0,
         "rubric": 2.5,
+        "llm_rubric_average": 2.5,
         "llm_calibrated": 4.41,
         "final": 4.54
       },
-      "seconds": 3.66
+      "seconds": 3.77
     }
   }
 }

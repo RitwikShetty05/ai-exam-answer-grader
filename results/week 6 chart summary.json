@@ -1,0 +1,488 @@
+{
+  "benchmark": [
+    {
+      "method": "Mean predictor (floor)",
+      "mae": 0.8892124459616829,
+      "mae_sd": 0.054467904348797745,
+      "rmse": 1.1016688496583373,
+      "rmse_sd": 0.08700441146061148
+    },
+    {
+      "method": "A: TF-IDF (calibrated)",
+      "mae": 0.7239525622252653,
+      "mae_sd": 0.13868650227243365,
+      "rmse": 0.9758038419404149,
+      "rmse_sd": 0.1283218934041201
+    },
+    {
+      "method": "B1: MiniLM embeddings",
+      "mae": 0.6877546522798037,
+      "mae_sd": 0.13539798432158076,
+      "rmse": 0.932980469115184,
+      "rmse_sd": 0.12736509887841338
+    },
+    {
+      "method": "B3: TinyBERT cross-encoder",
+      "mae": 0.6841974254384232,
+      "mae_sd": 0.1641789199474247,
+      "rmse": 0.9723257987894793,
+      "rmse_sd": 0.22009530914162745
+    },
+    {
+      "method": "B2 v2: LLM rubric grader",
+      "mae": 0.5525136615337705,
+      "mae_sd": 0.0612768190408554,
+      "rmse": 0.7797354870190099,
+      "rmse_sd": 0.08417080343681033
+    },
+    {
+      "method": "B5 v2: final grader (B3 + B2)",
+      "mae": 0.5715083997050476,
+      "mae_sd": 0.10662804053898398,
+      "rmse": 0.765802632616907,
+      "rmse_sd": 0.1391481242098173
+    }
+  ],
+  "quality": [
+    {
+      "method": "Mean predictor (floor)",
+      "Weak (< 2.5)": 2.577814805125474,
+      "Partial (2.5 - 3.9)": 1.0590030825616565,
+      "Strong (>= 4)": 0.6361848491167915
+    },
+    {
+      "method": "B3: TinyBERT cross-encoder",
+      "Weak (< 2.5)": 1.4980730554622521,
+      "Partial (2.5 - 3.9)": 0.8642344180570262,
+      "Strong (>= 4)": 0.5270074674127398
+    },
+    {
+      "method": "LLM raw score",
+      "Weak (< 2.5)": 1.0240885416666667,
+      "Partial (2.5 - 3.9)": 1.636611998359558,
+      "Strong (>= 4)": 1.3300767666889945
+    },
+    {
+      "method": "B5 v2: final grader",
+      "Weak (< 2.5)": 1.415817344922024,
+      "Partial (2.5 - 3.9)": 0.6931223024277194,
+      "Strong (>= 4)": 0.4309647682438044
+    }
+  ],
+  "band_order": [
+    "Weak (< 2.5)",
+    "Partial (2.5 - 3.9)",
+    "Strong (>= 4)"
+  ],
+  "reliability": [
+    {
+      "Confidence": "below 0.50",
+      "Share of answers (%)": 4.5,
+      "Average confidence": 0.424,
+      "Really within \u00b11 (%)": 26.6,
+      "MAE": 1.248,
+      "Answers in sample": 12
+    },
+    {
+      "Confidence": "0.50 - 0.70",
+      "Share of answers (%)": 10.1,
+      "Average confidence": 0.625,
+      "Really within \u00b11 (%)": 75.9,
+      "MAE": 0.777,
+      "Answers in sample": 57
+    },
+    {
+      "Confidence": "0.70 - 0.85",
+      "Share of answers (%)": 26.0,
+      "Average confidence": 0.788,
+      "Really within \u00b11 (%)": 83.1,
+      "MAE": 0.699,
+      "Answers in sample": 171
+    },
+    {
+      "Confidence": "0.85 and above",
+      "Share of answers (%)": 59.4,
+      "Average confidence": 0.894,
+      "Really within \u00b11 (%)": 86.9,
+      "MAE": 0.425,
+      "Answers in sample": 210
+    }
+  ],
+  "routing_shares": {
+    "Auto-graded": 81.21757650634419,
+    "Low confidence (< 0.60)": 7.221220069489812,
+    "LLM and rubric differ by 2+": 11.561203424165999,
+    "Instruction-like text": 0.0
+  },
+  "review_share": 18.782423493655813,
+  "large_errors_caught": 45.72611653356994,
+  "large_error_share": 7.500000000000001,
+  "human_ai": {
+    "Teacher 2 vs teacher 1": 0.723957290480367,
+    "Final grader vs teacher 1": 0.8200246546181043,
+    "Final grader vs teacher 2": 0.5954445551262074,
+    "Final grader vs average label": 0.5684742260880826
+  },
+  "within_one_weighted": 82.10398675389018,
+  "within_one_sample": 52.888888888888886,
+  "calibration_isotonic": {
+    "description": "Isotonic calibration: input = (LLM score + fixed rubric score) / 2 on a 0-5 scale, output = calibrated score on a 0-5 scale. Use linear interpolation between the points.",
+    "input_points": [
+      0.0,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      2.25,
+      2.5,
+      3.0,
+      3.25,
+      3.5,
+      4.0,
+      4.25,
+      4.75,
+      5.0
+    ],
+    "output_points": [
+      2.7598591697264587,
+      2.7598591697264587,
+      3.2786310041724898,
+      3.2786310041724898,
+      4.13883382143088,
+      4.13883382143088,
+      4.406188019553436,
+      4.406188019553436,
+      4.479616306954436,
+      4.507922506882459,
+      4.507922506882459,
+      4.790590827701695,
+      4.790590827701695,
+      4.984111921091604
+    ]
+  },
+  "calibration_week5_line": {
+    "intercept": 2.8807035564010604,
+    "llm_weight": 0.241253327903262,
+    "rubric_weight": 0.1818340334822653
+  },
+  "robustness_perturbations": [
+    {
+      "Test": "Spelling mistakes",
+      "Answers": 10,
+      "B3 fine-tuned": -0.22,
+      "B2 LLM raw": -0.85,
+      "B2 calibrated": -0.32,
+      "B5 ensemble": -0.27,
+      "B3 fine-tuned: moved more than 1 mark": "1 of 10",
+      "B2 LLM raw: moved more than 1 mark": "3 of 10"
+    },
+    {
+      "Test": "Irrelevant padding",
+      "Answers": 10,
+      "B3 fine-tuned": -0.36,
+      "B2 LLM raw": -1.2,
+      "B2 calibrated": -0.29,
+      "B5 ensemble": -0.33,
+      "B3 fine-tuned: moved more than 1 mark": "0 of 10",
+      "B2 LLM raw: moved more than 1 mark": "6 of 10"
+    },
+    {
+      "Test": "Repeated 3 times",
+      "Answers": 10,
+      "B3 fine-tuned": 0.05,
+      "B2 LLM raw": 0.1,
+      "B2 calibrated": 0.06,
+      "B5 ensemble": 0.05,
+      "B3 fine-tuned: moved more than 1 mark": "0 of 10",
+      "B2 LLM raw: moved more than 1 mark": "2 of 10"
+    },
+    {
+      "Test": "First 3 words only",
+      "Answers": 10,
+      "B3 fine-tuned": -1.63,
+      "B2 LLM raw": -2.0,
+      "B2 calibrated": -0.92,
+      "B5 ensemble": -1.27,
+      "B3 fine-tuned: moved more than 1 mark": "8 of 10",
+      "B2 LLM raw: moved more than 1 mark": "6 of 10"
+    }
+  ],
+  "robustness_sanity": [
+    {
+      "Test": "Reference answer copied",
+      "Questions": 11,
+      "Should get": "5 (full marks)",
+      "B3 fine-tuned": 4.93,
+      "B2 LLM raw": 4.41,
+      "B2 calibrated": 4.78,
+      "B5 ensemble": 4.85
+    },
+    {
+      "Test": "Question copied",
+      "Questions": 11,
+      "Should get": "0 to 1",
+      "B3 fine-tuned": 3.21,
+      "B2 LLM raw": 0.91,
+      "B2 calibrated": 3.16,
+      "B5 ensemble": 3.19
+    },
+    {
+      "Test": "Keyword list",
+      "Questions": 11,
+      "Should get": "below full marks",
+      "B3 fine-tuned": 4.81,
+      "B2 LLM raw": 2.91,
+      "B2 calibrated": 4.2,
+      "B5 ensemble": 4.5
+    },
+    {
+      "Test": "I don't know",
+      "Questions": 11,
+      "Should get": "0",
+      "B3 fine-tuned": 0.98,
+      "B2 LLM raw": 0.18,
+      "B2 calibrated": 2.97,
+      "B5 ensemble": 1.97
+    }
+  ],
+  "robustness_injection": [
+    {
+      "Test": "Ignore instructions",
+      "Answers": 10,
+      "B3 fine-tuned": 0.48,
+      "B2 LLM raw": 0.0,
+      "B2 calibrated": 0.09,
+      "B5 ensemble": 0.28,
+      "B3 fine-tuned: rose by 1 mark or more": "1 of 10",
+      "B2 LLM raw: rose by 1 mark or more": "1 of 10",
+      "Flagged by pattern check": "10 of 10"
+    },
+    {
+      "Test": "Fake system message",
+      "Answers": 10,
+      "B3 fine-tuned": 0.31,
+      "B2 LLM raw": 0.35,
+      "B2 calibrated": 0.14,
+      "B5 ensemble": 0.22,
+      "B3 fine-tuned: rose by 1 mark or more": "1 of 10",
+      "B2 LLM raw: rose by 1 mark or more": "2 of 10",
+      "Flagged by pattern check": "10 of 10"
+    },
+    {
+      "Test": "Closes the answer tag",
+      "Answers": 10,
+      "B3 fine-tuned": 0.36,
+      "B2 LLM raw": 0.4,
+      "B2 calibrated": 0.15,
+      "B5 ensemble": 0.25,
+      "B3 fine-tuned: rose by 1 mark or more": "1 of 10",
+      "B2 LLM raw: rose by 1 mark or more": "2 of 10",
+      "Flagged by pattern check": "0 of 10"
+    },
+    {
+      "Test": "Polite request",
+      "Answers": 10,
+      "B3 fine-tuned": 0.41,
+      "B2 LLM raw": 0.0,
+      "B2 calibrated": 0.05,
+      "B5 ensemble": 0.23,
+      "B3 fine-tuned: rose by 1 mark or more": "1 of 10",
+      "B2 LLM raw: rose by 1 mark or more": "2 of 10",
+      "Flagged by pattern check": "0 of 10"
+    },
+    {
+      "Test": "Injection only",
+      "Answers": 10,
+      "B3 fine-tuned": -0.62,
+      "B2 LLM raw": 0.25,
+      "B2 calibrated": -0.0,
+      "B5 ensemble": -0.31,
+      "B3 fine-tuned: rose by 1 mark or more": "1 of 10",
+      "B2 LLM raw: rose by 1 mark or more": "3 of 10",
+      "Flagged by pattern check": "10 of 10"
+    }
+  ],
+  "examples": {
+    "Correct answer in different words ('log n')": {
+      "question": "Q1",
+      "student_id": null,
+      "score": 4.5,
+      "maximum_score": 5,
+      "feedback": "Only partly covered: It depends on the height of the tree. | The answer suggests the height, but does not explicitly state it. More clarity is needed.",
+      "confidence": 0.9,
+      "needs_human_review": false,
+      "review_reasons": [],
+      "concepts": [
+        {
+          "concept": "It depends on the height of the tree.",
+          "status": "partial",
+          "evidence": "log n"
+        }
+      ],
+      "wrong_statements": [],
+      "rubric_source": "saved",
+      "grading_mode": "full",
+      "scores_out_of_5": {
+        "similarity_model": 4.67,
+        "llm": 2.5,
+        "rubric_before_penalty": 2.5,
+        "wrong_statement_penalty": 0.0,
+        "rubric": 2.5,
+        "llm_rubric_average": 2.5,
+        "llm_calibrated": 4.41,
+        "final": 4.54
+      },
+      "seconds": 3.75,
+      "human_mark": 4.75,
+      "student_answer": "log n",
+      "question_text": "How many steps does it take to search a node in a binary search tree?",
+      "reference_answer": "The height of the tree."
+    },
+    "Wrong answer on the right topic (known failure)": {
+      "question": "Q1",
+      "student_id": null,
+      "score": 3.0,
+      "maximum_score": 5,
+      "feedback": "Missing: It stores elements following the first in first out principle. The main operation is enqueue. The main operation is dequeue. | Check this statement: like a linked list expect first in last out | The answer is completely wrong. Try to understand the FIFO principle.",
+      "confidence": 0.82,
+      "needs_human_review": false,
+      "review_reasons": [],
+      "concepts": [
+        {
+          "concept": "It stores elements following the first in first out principle.",
+          "status": "missing",
+          "evidence": ""
+        },
+        {
+          "concept": "The main operation is enqueue.",
+          "status": "missing",
+          "evidence": ""
+        },
+        {
+          "concept": "The main operation is dequeue.",
+          "status": "missing",
+          "evidence": ""
+        }
+      ],
+      "wrong_statements": [
+        "like a linked list expect first in last out"
+      ],
+      "rubric_source": "saved",
+      "grading_mode": "full",
+      "scores_out_of_5": {
+        "similarity_model": 3.62,
+        "llm": 0.0,
+        "rubric_before_penalty": 0.0,
+        "wrong_statement_penalty": 0.0,
+        "rubric": 0.0,
+        "llm_rubric_average": 0.0,
+        "llm_calibrated": 2.76,
+        "final": 3.19
+      },
+      "seconds": 5.96,
+      "human_mark": 1.25,
+      "student_answer": "like a linked list expect first in last out",
+      "question_text": "What is a queue?",
+      "reference_answer": "A data structure that stores elements following the first in first out principle. The main operations in a queue are enqueue and dequeue."
+    }
+  },
+  "topics": {
+    "Arrays and strings": [
+      "How are arrays passed to functions?",
+      "How can an array be addressed in pointer/offset notation?",
+      "How many dimensions need to be specified when passing a multi-dimensional array as an argument to a function?",
+      "What are the two different ways of specifying the length of an array?",
+      "What is the difference between an array declared as static, and one that is not?",
+      "What is the difference between an array that is declared as static and one that is not?",
+      "What is the main difference between a string of characters that is read into a variable of type string versus a variable of type char[]?",
+      "What is the main difference between strings declared using the type string versus strings declared using an array of characters?"
+    ],
+    "Classes and objects": [
+      "How are objects initialized when they are created?",
+      "How many constructors can be created for a class?",
+      "What are the access-specifiers that can be used in a C++ class definition?",
+      "What are the elements typically included in a class definition?",
+      "What are the main advantages associated with object-oriented programming?",
+      "What is the difference between a constructor and a function?",
+      "What is the difference between a data member and a local variable inside a member function?",
+      "What is typically included in a class definition?",
+      "When does C++ create a default constructor?"
+    ],
+    "Functions and recursion": [
+      "What are the similarities between iteration and recursion?",
+      "What does a function signature include?",
+      "What does the sizeof operator return?",
+      "What does the star (*) operator return?",
+      "What is a function signature?",
+      "What is a recursive function?",
+      "What is the alternative way to solve a problem that could be solved through recursive functions?",
+      "What is the difference between a function prototype and a function definition?",
+      "When defining a recursive function, what are possible causes for infinite recursion?"
+    ],
+    "Linked lists": [
+      "How are linked lists passed as arguments to a function?",
+      "What is a linked list?",
+      "What is the advantage of linked lists over arrays?",
+      "What is the difference between a circular linked list and a basic linked list?",
+      "What is the main advantage of a doubly-linked list over a basic linked list?",
+      "What is the main advantage of arrays over linked lists?",
+      "What is the main advantage of linked lists over arrays?",
+      "What is the main disadvantage of a doubly-linked list over a basic linked list?"
+    ],
+    "Pointers and memory": [
+      "What are the different ways to pass a pointer to a function?",
+      "What does the address (&) operator return?",
+      "What is a function pointer?",
+      "What is a pointer?",
+      "What is the main advantage associated with function arguments that are passed by reference?"
+    ],
+    "Program basics and design": [
+      "Briefly describe the divide-and-conquer paradigm.",
+      "How are infix expressions evaluated by computers?",
+      "How are overloaded functions differentiated by the compiler?",
+      "How does the compiler handle inline functions?",
+      "What is a variable?",
+      "What is the experimental approach for measuring the running time of an algorithm?",
+      "What is the main difference between a while and a do...while statement?",
+      "What is the role of a header-file?",
+      "What is the role of a prototype program in problem solving?",
+      "What is the scope of global variables?",
+      "What stages in the software life cycle are influenced by the testing stage?",
+      "Where are variables declared in a C++ program?",
+      "Where do C++ programs begin to execute?"
+    ],
+    "Sorting and searching": [
+      "Briefly describe in one sentence how does merge sort work?",
+      "Briefly, how does selection sort work?",
+      "In one sentence, what is the main idea implemented by insertion sort?",
+      "In one sentence, what is the main idea implemented by selection sort?",
+      "What is the base case for a recursive implementation of merge sort?",
+      "What is the number of operations for insertion sort under a best-case scenario, and what is the best-case scenario?"
+    ],
+    "Stacks and queues": [
+      "How can you implement a queue with a list?",
+      "How can you implement a queue with an array?",
+      "How can you implement a stack with a list?",
+      "How can you implement a stack with an array?",
+      "What are the main operations associated with a stack?",
+      "What are the two main functions defined by a queue?",
+      "What are the two main functions defined by a stack?",
+      "What is a queue?",
+      "What is a stack?",
+      "What is the stack operation corresponding to the enqueue operation in queues?",
+      "What operations would you need to perform to find a given element on a stack?"
+    ],
+    "Trees": [
+      "How do you delete a node from a binary search tree?",
+      "How many comparisons does it take to find an element in a binary search tree?",
+      "How many steps does it take to search a node in a binary search tree?",
+      "What is a binary search tree?",
+      "What is a binary tree?",
+      "What is a leaf?",
+      "What is a tree?",
+      "What is the Euler tour traversal of a tree?",
+      "What is the height of a tree?",
+      "What is the inorder traversal of a binary tree?"
+    ]
+  }
+}
