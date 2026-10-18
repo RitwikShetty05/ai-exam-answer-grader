@@ -1,0 +1,9 @@
+{
+  "llm_model": "qwen2.5:7b-instruct",
+  "ollama_address": "http://localhost:11434",
+  "cross_encoder_folder": "models/cross encoder",
+  "confidence_threshold_for_review": 0.6,
+  "llm_rubric_gap_for_review": 2,
+  "ocr_confidence_threshold": 0.8,
+  "version": "week 6"
+}

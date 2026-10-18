@@ -1,0 +1,5 @@
+Comparison,MAE gain,95% CI,Verdict
+B2 v2: fixed rubric score + isotonic + blank rule  vs  B2 v1: Week 5 linear calibration,0.029,"[-0.014, 0.072]",No clear difference (CI includes 0)
+B2: linear calibration + fixed rubric score  vs  B2 v1: Week 5 linear calibration,-0.002,"[-0.025, 0.021]",No clear difference (CI includes 0)
+B5 v2: B3 + B2 v2 (Week 6)  vs  B5 v1: B3 + B2 v1 (Week 5),0.015,"[-0.004, 0.035]",No clear difference (CI includes 0)
+B5 v2: B3 + B2 v2 (Week 6)  vs  B3: Cross-encoder fine-tuned,0.11,"[0.048, 0.175]",First is better (CI above 0)

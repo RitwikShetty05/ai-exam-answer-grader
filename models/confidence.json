@@ -1,0 +1,7 @@
+{
+  "description": "confidence = 1 / (1 + exp(-(intercept + weight_agreement_gap * |B3 - B2| + weight_llm_rubric_gap * |LLM score - rubric score|))), all on a 0-5 scale. It estimates the chance that the mark is within 1 mark (on 5) of a human grader.",
+  "intercept": 2.4922610902665716,
+  "weight_agreement_gap": -1.1666480613468335,
+  "weight_llm_rubric_gap": -0.13308997648706225,
+  "similarity_only_confidence": 0.75
+}

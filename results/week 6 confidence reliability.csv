@@ -1,0 +1,5 @@
+Confidence,Share of answers (%),Average confidence,Really within ±1 (%),MAE,Answers in sample
+below 0.50,4.5,0.424,26.6,1.248,12
+0.50 - 0.70,10.1,0.625,75.9,0.777,57
+0.70 - 0.85,26.0,0.788,83.1,0.699,171
+0.85 and above,59.4,0.894,86.9,0.425,210

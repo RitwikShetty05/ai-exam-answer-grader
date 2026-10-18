@@ -1,0 +1,6 @@
+__pycache__/
+.DS_Store
+.streamlit/secrets.toml
+*.docx
+*.pdf
+.ipynb_checkpoints/
