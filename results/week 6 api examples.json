@@ -80,7 +80,7 @@
         "llm_calibrated": 4.41,
         "final": 4.67
       },
-      "seconds": 8.3
+      "seconds": 8.92
     }
   },
   "POST /evaluate-batch": {
@@ -211,7 +211,7 @@
             "llm_calibrated": 4.41,
             "final": 4.66
           },
-          "seconds": 9.22
+          "seconds": 9.4
         },
         {
           "question": "Q1",
@@ -255,7 +255,7 @@
             "llm_calibrated": 2.76,
             "final": 3.29
           },
-          "seconds": 8.4
+          "seconds": 8.67
         },
         {
           "question": "Q2",
@@ -291,7 +291,7 @@
             "llm_calibrated": 2.76,
             "final": 1.85
           },
-          "seconds": 6.93
+          "seconds": 4.73
         },
         {
           "question": "Q2",
@@ -323,7 +323,7 @@
             "llm_calibrated": 4.79,
             "final": 4.87
           },
-          "seconds": 6.43
+          "seconds": 4.43
         },
         {
           "question": "Q3",
@@ -355,7 +355,7 @@
             "llm_calibrated": 4.98,
             "final": 4.96
           },
-          "seconds": 4.01
+          "seconds": 3.92
         },
         {
           "question": "Q3",
@@ -389,7 +389,7 @@
             "llm_calibrated": 2.76,
             "final": 2.26
           },
-          "seconds": 3.83
+          "seconds": 3.9
         },
         {
           "question": "Q4",
@@ -423,7 +423,7 @@
             "llm_calibrated": 3.28,
             "final": 3.06
           },
-          "seconds": 4.58
+          "seconds": 4.31
         },
         {
           "question": "Q4",
@@ -455,7 +455,7 @@
             "llm_calibrated": 4.98,
             "final": 4.97
           },
-          "seconds": 4.81
+          "seconds": 4.78
         }
       ],
       "answers_graded": 8,
@@ -505,7 +505,7 @@
         "llm_calibrated": 4.41,
         "final": 4.54
       },
-      "seconds": 3.77
+      "seconds": 3.81
     }
   }
 }

@@ -214,7 +214,7 @@ def benchmark(rows):
 
 
 def quality(rows, band_order):
-    colours = [light_gray, blue, orange, aqua]
+    colours = [light_gray, aqua, orange, blue]
     figure = go.Figure()
     for index, row in enumerate(rows):
         values = []

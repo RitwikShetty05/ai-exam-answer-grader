@@ -332,7 +332,7 @@
         "llm_calibrated": 4.41,
         "final": 4.54
       },
-      "seconds": 3.75,
+      "seconds": 3.92,
       "human_mark": 4.75,
       "student_answer": "log n",
       "question_text": "How many steps does it take to search a node in a binary search tree?",
