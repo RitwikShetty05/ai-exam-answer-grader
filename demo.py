@@ -151,6 +151,23 @@ def load_example():
             st.session_state["single_result"] = None
 
 
+def suggest_rubric():
+    body = {"question_text": st.session_state["question_text"], "reference_answer": st.session_state["reference_answer"]}
+    st.session_state["rubric_error"] = None
+    try:
+        if GRADER_MODE == "module":
+            rubric_reply = run_in_page("/generate-rubric", body)
+        else:
+            reply = requests.post(api_address + "/generate-rubric", json=body, timeout=300)
+            if reply.status_code != 200:
+                st.session_state["rubric_error"] = "The API returned an error (" + str(reply.status_code) + "): " + reply.text
+                return
+            rubric_reply = reply.json()
+        st.session_state["rubric_text"] = "\n".join(rubric_reply["rubric"])
+    except Exception as error:
+        st.session_state["rubric_error"] = "Could not suggest a rubric: " + str(error)
+
+
 if "question_text" not in st.session_state:
     st.session_state["example_title"] = demo_exam["single_examples"][0]["title"]
     load_example()
@@ -175,10 +192,9 @@ with single_tab:
         st.number_input("Maximum marks", min_value=1.0, max_value=100.0, step=1.0, key="maximum_marks")
     with right:
         st.text_area("Marking rubric (optional, one key concept per line)", key="rubric_text", height=110)
-        if st.button("Suggest a rubric from the reference answer"):
-            rubric_reply = call_api("/generate-rubric", {"question_text": st.session_state["question_text"], "reference_answer": st.session_state["reference_answer"]})
-            st.session_state["rubric_text"] = "\n".join(rubric_reply["rubric"])
-            st.rerun()
+        st.button("Suggest a rubric from the reference answer", on_click=suggest_rubric)
+        if st.session_state.get("rubric_error"):
+            st.error(st.session_state["rubric_error"])
         st.text_area("Student answer", key="student_answer", height=110)
         from_ocr = st.checkbox("This answer comes from OCR (Group 1)")
         ocr_confidence = None
