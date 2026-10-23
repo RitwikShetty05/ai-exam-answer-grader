@@ -1,0 +1,16 @@
+{
+  "Q1": {
+    "question_text": "Explain the OSI model and how an email is sent and received through its layers.",
+    "reference_answer": "The OSI model has seven layers, and an email passes down through them on the sender's side (each layer adds its own header, called encapsulation) and back up on the receiver's side (de-encapsulation). Application layer (7): email programs such as Gmail or Outlook use SMTP to send mail and IMAP or POP3 to receive it. Presentation layer (6): formats and encodes the message and attachments, and can compress and encrypt them. Session layer (5): opens, manages and closes the session between the email client and the mail server. Transport layer (4): TCP splits the message into segments and makes sure they arrive reliably and in order. Network layer (3): IP adds addresses and routes the packets between the sender's and the receiver's mail servers. Data link and physical layers (2 and 1): the data is put into frames and sent as bits over cables or Wi-Fi.",
+    "maximum_marks": 10,
+    "rubric": [
+      "An email passes down through the seven OSI layers at the sender (encapsulation) and back up at the receiver (de-encapsulation).",
+      "Application layer: email programs use SMTP to send and IMAP or POP3 to receive emails.",
+      "Presentation layer: formats, encodes, compresses and encrypts the message and attachments.",
+      "Session layer: opens, manages and closes the session between the email client and the server.",
+      "Transport layer: TCP splits the message into segments and delivers them reliably.",
+      "Network layer: IP addresses and routes the packets between the mail servers.",
+      "Data link and physical layers: frames and bits are sent over the physical network (cables or Wi-Fi)."
+    ]
+  }
+}

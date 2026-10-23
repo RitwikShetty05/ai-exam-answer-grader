@@ -1,0 +1,3 @@
+page,handwriting,true student ID,CER,WER,OCR confidence
+aayush_page-01,neat,E007,0.038,0.163,0.82
+rish_page-1,cursive,E013,0.348,0.974,0.4

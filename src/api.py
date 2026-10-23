@@ -1,16 +1,20 @@
+import os
+import tempfile
 import threading
 from typing import Dict, List, Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, Field
 import grader
+import group1
 
 app = FastAPI(
     title="AI Exam Answer Grader — Group 2",
-    version="1.0 (Week 6)",
+    version="1.1 (Week 7)",
     description=(
         "Recommends a mark and feedback for a student's descriptive answer by comparing it with a reference answer and a marking rubric. "
         "It combines a fine-tuned cross-encoder (semantic similarity) with a local LLM that checks each rubric concept against the student's own words. "
         "The mark is advisory: answers with low confidence, instruction-like text or low OCR confidence are flagged for a teacher. "
+        "Week 7 adds direct support for Group 1's Handwritten Exam Digitizer: POST /digitize reads a scanned page with their digitize_page(), and POST /evaluate-group1-pages grades their page records as they are. "
         "Everything runs on the local machine; no answer text is sent to an external AI service."
     ),
 )
@@ -49,6 +53,23 @@ class AnswerKeyItem(BaseModel):
     rubric: Optional[List[str]] = Field(None, description="Optional rubric, one key concept per item.")
 
 
+class Group1Page(BaseModel):
+    student_id: Optional[str] = Field(None, description="Student ID read by Group 1's digitizer (often missing on handwritten pages).", examples=["E007"])
+    question: Optional[str] = Field(None, description="Question number guessed by Group 1's digitizer.", examples=["Q1"])
+    answer_text: str = Field(..., description="The full OCR text of the page, exactly as digitize_page() returns it.")
+    page: Optional[int] = Field(None, description="Page number of the answer sheet.", examples=[1])
+    marks_detected: Optional[str] = Field(None, description="Marks written on the page, if any (not used for grading).")
+    ocr_confidence: Optional[float] = Field(None, ge=0, le=1, description="Tesseract's average word confidence for the page (0-1).", examples=[0.82])
+    confidence: Optional[float] = Field(None, ge=0, le=1, description="Same as ocr_confidence (the field name used in the course handout).")
+    entities_found: Optional[List[dict]] = Field(None, description="Entity candidates from Group 1's NER (not used for grading).")
+
+
+class Group1PagesRequest(BaseModel):
+    answer_key: Dict[str, AnswerKeyItem] = Field(..., description="One entry per question label with the question, reference answer, maximum marks and optional rubric.")
+    pages: List[Group1Page] = Field(..., description="Page records exactly as Group 1's digitize_page() returns them, one per scanned page, for one student.")
+    student_id: Optional[str] = Field(None, description="Student ID typed by the teacher, used when the digitizer could not read it from the page.", examples=["E007"])
+
+
 class BatchRequest(BaseModel):
     answer_key: Dict[str, AnswerKeyItem] = Field(..., description="One entry per question label (for example 'Q3') with the question, reference answer, maximum marks and optional rubric.")
     answers: List[Group1Record] = Field(..., description="Answers in Group 1's Handwritten Exam Digitizer output format.")
@@ -64,6 +85,9 @@ class GradeResult(BaseModel):
     question: Optional[str] = Field(None, description="The question label from the request.")
     student_id: Optional[str] = Field(None, description="The student identifier from the request.")
     page: Optional[int] = Field(None, description="Page number (batch requests only).")
+    pages: Optional[List[int]] = Field(None, description="All pages this answer was found on (Group 1 page requests only).")
+    answer_text: Optional[str] = Field(None, description="The answer text that was graded, after the page header was removed (Group 1 page requests only).")
+    removed_header: Optional[str] = Field(None, description="Header text removed from the first page, such as name and roll number (Group 1 page requests only).")
     score: float = Field(..., description="Recommended score, scaled to maximum_score and rounded to 0.5. Advisory only.")
     maximum_score: float = Field(..., description="Maximum marks for the question.")
     feedback: str = Field(..., description="Explainable feedback: which rubric concepts are covered, partly covered or missing, plus a short comment.")
@@ -97,7 +121,8 @@ def health():
         "llm_available": grader.llm_is_available(),
         "llm_provider": grader.LLM_PROVIDER,
         "llm_model": grader.LLM_MODEL,
-        "version": grader.settings["version"],
+        "group1_digitizer_available": group1.digitizer_available(),
+        "version": "week 7",
     }
 
 
@@ -145,6 +170,48 @@ def evaluate_batch(request: BatchRequest):
             raise HTTPException(status_code=400, detail=str(error))
         except RuntimeError as error:
             raise HTTPException(status_code=503, detail=str(error))
+    needing_review = 0
+    for result in results:
+        if result["needs_human_review"]:
+            needing_review = needing_review + 1
+    return {"results": results, "answers_graded": len(results), "answers_needing_review": needing_review}
+
+
+@app.post("/digitize", summary="Read a scanned answer sheet page with Group 1's Handwritten Exam Digitizer")
+def digitize(image: UploadFile = File(..., description="A scanned or photographed answer sheet page (jpg or png)."), page_number: Optional[int] = Form(None, description="Page number of this page.")):
+    if not group1.digitizer_available():
+        raise HTTPException(status_code=503, detail="Group 1's digitizer is not installed on this computer (see GET /health).")
+    extension = os.path.splitext(image.filename or "")[1].lower()
+    if extension not in [".jpg", ".jpeg", ".png"]:
+        raise HTTPException(status_code=400, detail="Please upload a .jpg or .png image of one page.")
+    temporary = tempfile.NamedTemporaryFile(suffix=extension, delete=False)
+    try:
+        temporary.write(image.file.read())
+        temporary.close()
+        with grading_lock:
+            record = group1.digitize(temporary.name, page_number=page_number)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+    finally:
+        os.remove(temporary.name)
+    return record
+
+
+@app.post("/evaluate-group1-pages", response_model=BatchResult, summary="Grade page records exactly as Group 1's digitizer returns them")
+def evaluate_group1_pages(request: Group1PagesRequest):
+    answer_key = {}
+    for question_id, item in request.answer_key.items():
+        answer_key[question_id] = item.model_dump()
+    pages = []
+    for page in request.pages:
+        pages.append(page.model_dump())
+    try:
+        with grading_lock:
+            results = group1.grade_pages(grader, pages, answer_key, request.student_id)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error))
     needing_review = 0
     for result in results:
         if result["needs_human_review"]:

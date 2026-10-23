@@ -1,0 +1,7 @@
+page,graded text,mark (out of 10),similarity model,LLM,rubric,points present / partial,confidence,flagged
+aayush_page-01,true text,8.0,3.86,2.5,1.5,1 / 3,0.88,True
+aayush_page-01,OCR text,8.0,3.71,2.5,1.5,1 / 3,0.86,True
+aayush_page-01,OCR text + OCR-aware prompt,8.0,3.71,2.5,1.5,1 / 3,0.86,True
+rish_page-1,true text,8.5,4.07,3.0,2.0,3 / 0,0.88,True
+rish_page-1,OCR text,7.5,2.75,5.0,2.0,3 / 0,0.51,True
+rish_page-1,OCR text + OCR-aware prompt,7.0,2.75,4.5,2.0,3 / 0,0.53,True

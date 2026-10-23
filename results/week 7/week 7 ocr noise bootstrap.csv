@@ -1,0 +1,5 @@
+comparison,MAE gain,95% CI,verdict
+CER 0.19 + OCR-aware prompt vs CER 0.19,0.024,"[-0.099, 0.131]",not significant
+CER 0.34 + OCR-aware prompt vs CER 0.34,-0.088,"[-0.199, 0.029]",not significant
+clean vs CER 0.19,0.587,"[0.132, 0.907]",real difference
+clean vs CER 0.34,0.777,"[0.258, 1.117]",real difference

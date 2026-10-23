@@ -1,0 +1,7 @@
+condition,measured CER,MAE vs teachers,within ±1 (%),mark change vs clean,similarity model change,LLM (calibrated) change,flagged for review (%),mean confidence
+clean,0.0,0.567,75.6,0.0,0.0,0.0,23.1,0.813
+CER 0.04,0.04,0.659,76.0,0.222,0.203,0.28,17.8,0.816
+CER 0.19,0.19,1.154,47.2,0.847,1.134,0.67,39.0,0.775
+CER 0.34,0.34,1.344,33.9,1.174,1.67,0.781,37.9,0.709
+CER 0.19 + OCR-aware prompt,0.19,1.13,45.8,0.835,1.134,0.72,42.8,0.761
+CER 0.34 + OCR-aware prompt,0.34,1.432,22.2,1.237,1.67,0.891,43.7,0.73

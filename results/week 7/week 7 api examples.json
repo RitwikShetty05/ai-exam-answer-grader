@@ -1,0 +1,267 @@
+{
+  "aayush_page-01": {
+    "digitize_response": {
+      "student_id": null,
+      "question": "Q1",
+      "answer_text": "ISP Assignment % - Eool hayush Nayak\nQL OS! Model in Email Sending and Recening\nIn the OS| (Open Systems Interconnection) Model, email\nCommunication follows a specific path\nthrough the layers, with each layer contributing to efficient data\nexchange. Here's how email\ntypically moves through each OSI layer:\nApplication Layer (Layer 7): This layer interacts with email\napplications (6.4, Ginall\nOutlook) using protocols lke SMTP (Simple Mail Transfer Protocol)\nfor sending and\nIMAP/POP for recening emails. Users Compose an email, and the\nemail application\nprepares it for transter over t he network\n2. Presentation Layer (Layer 6): This layer converts data into a\nformat suitable for the\napplication layer, handing encryption and compression. I ensures\nthat the email\ncontent (ike attachments) is properly formatted for both sender\nand recipient.\n%. Session Layer (Layer %) This layer manages the session\nbetween email servers and\nclents. tt establ",
+      "page": 1,
+      "marks_detected": null,
+      "ocr_confidence": 0.82,
+      "entities_found": [
+        {
+          "text": "Q1",
+          "label": "QUESTION_NUM",
+          "start_char": 37,
+          "end_char": 39
+        }
+      ]
+    },
+    "evaluate_request": {
+      "answer_key": {
+        "Q1": {
+          "question_text": "Explain the OSI model and how an email is sent and received through its layers.",
+          "reference_answer": "The OSI model has seven layers, and an email passes down through them on the sender's side (each layer adds its own header, called encapsulation) and back up on the receiver's side (de-encapsulation). Application layer (7): email programs such as Gmail or Outlook use SMTP to send mail and IMAP or POP3 to receive it. Presentation layer (6): formats and encodes the message and attachments, and can compress and encrypt them. Session layer (5): opens, manages and closes the session between the email client and the mail server. Transport layer (4): TCP splits the message into segments and makes sure they arrive reliably and in order. Network layer (3): IP adds addresses and routes the packets between the sender's and the receiver's mail servers. Data link and physical layers (2 and 1): the data is put into frames and sent as bits over cables or Wi-Fi.",
+          "maximum_marks": 10,
+          "rubric": [
+            "An email passes down through the seven OSI layers at the sender (encapsulation) and back up at the receiver (de-encapsulation).",
+            "Application layer: email programs use SMTP to send and IMAP or POP3 to receive emails.",
+            "Presentation layer: formats, encodes, compresses and encrypts the message and attachments.",
+            "Session layer: opens, manages and closes the session between the email client and the server.",
+            "Transport layer: TCP splits the message into segments and delivers them reliably.",
+            "Network layer: IP addresses and routes the packets between the mail servers.",
+            "Data link and physical layers: frames and bits are sent over the physical network (cables or Wi-Fi)."
+          ]
+        }
+      },
+      "pages": [
+        {
+          "student_id": null,
+          "question": "Q1",
+          "answer_text": "ISP Assignment % - Eool hayush Nayak\nQL OS! Model in Email Sending and Recening\nIn the OS| (Open Systems Interconnection) Model, email\nCommunication follows a specific path\nthrough the layers, with each layer contributing to efficient data\nexchange. Here's how email\ntypically moves through each OSI layer:\nApplication Layer (Layer 7): This layer interacts with email\napplications (6.4, Ginall\nOutlook) using protocols lke SMTP (Simple Mail Transfer Protocol)\nfor sending and\nIMAP/POP for recening emails. Users Compose an email, and the\nemail application\nprepares it for transter over t he network\n2. Presentation Layer (Layer 6): This layer converts data into a\nformat suitable for the\napplication layer, handing encryption and compression. I ensures\nthat the email\ncontent (ike attachments) is properly formatted for both sender\nand recipient.\n%. Session Layer (Layer %) This layer manages the session\nbetween email servers and\nclents. tt establ",
+          "page": 1,
+          "marks_detected": null,
+          "ocr_confidence": 0.82,
+          "entities_found": [
+            {
+              "text": "Q1",
+              "label": "QUESTION_NUM",
+              "start_char": 37,
+              "end_char": 39
+            }
+          ]
+        }
+      ],
+      "student_id": "E007"
+    },
+    "evaluate_response": {
+      "results": [
+        {
+          "question": "Q1",
+          "student_id": "E007",
+          "page": 1,
+          "pages": [
+            1
+          ],
+          "answer_text": "QL OS! Model in Email Sending and Recening In the OS| (Open Systems Interconnection) Model, email Communication follows a specific path through the layers, with each layer contributing to efficient data exchange. Here's how email typically moves through each OSI layer: Application Layer (Layer 7): This layer interacts with email applications (6.4, Ginall Outlook) using protocols lke SMTP (Simple Mail Transfer Protocol) for sending and IMAP/POP for recening emails. Users Compose an email, and the email application prepares it for transter over t he network 2. Presentation Layer (Layer 6): This layer converts data into a format suitable for the application layer, handing encryption and compression. I ensures that the email content (ike attachments) is properly formatted for both sender and recipient. %. Session Layer (Layer %) This layer manages the session between email servers and clents. tt establ",
+          "removed_header": "ISP Assignment % - Eool hayush Nayak",
+          "score": 8.0,
+          "maximum_score": 10.0,
+          "feedback": "Covered: Application layer: email programs use SMTP to send and IMAP or POP3 to receive emails. | Only partly covered: An email passes down through the seven OSI layers at the sender (encapsulation) and back up at the receiver (de-encapsulation). Presentation layer: formats, encodes, compresses and encrypts the message and attachments. Session layer: opens, manages and closes the session between the email client and the server. | Missing: Transport layer: TCP splits the message into segments and delivers them reliably. Network layer: IP addresses and routes the packets between the mail servers. Data link and physical layers: frames and bits are sent over the physical network (cables or Wi-Fi). | Check this statement: Ginall Outlook | Your answer covers some key points but lacks details about the layers and their functions. Make sure to include all seven layers and their roles in the email process.",
+          "confidence": 0.86,
+          "needs_human_review": true,
+          "review_reasons": [
+            "Long answer (140 words): much longer than the answers the similarity model was trained on (95% had 45 words or fewer), so check the mark."
+          ],
+          "concepts": [
+            {
+              "concept": "An email passes down through the seven OSI layers at the sender (encapsulation) and back up at the receiver (de-encapsulation).",
+              "status": "partial",
+              "evidence": "email Communication follows a specific path through the layers"
+            },
+            {
+              "concept": "Application layer: email programs use SMTP to send and IMAP or POP3 to receive emails.",
+              "status": "present",
+              "evidence": "This layer interacts with email applications (6.4, Ginall Outlook) using protocols lke SMTP (Simple Mail Transfer Protocol) for sending and IMAP/POP for recening emails."
+            },
+            {
+              "concept": "Presentation layer: formats, encodes, compresses and encrypts the message and attachments.",
+              "status": "partial",
+              "evidence": "This layer converts data into a format suitable for the application layer, handing encryption and compression."
+            },
+            {
+              "concept": "Session layer: opens, manages and closes the session between the email client and the server.",
+              "status": "partial",
+              "evidence": "This layer manages the session between email servers and clents."
+            },
+            {
+              "concept": "Transport layer: TCP splits the message into segments and delivers them reliably.",
+              "status": "missing",
+              "evidence": ""
+            },
+            {
+              "concept": "Network layer: IP addresses and routes the packets between the mail servers.",
+              "status": "missing",
+              "evidence": ""
+            },
+            {
+              "concept": "Data link and physical layers: frames and bits are sent over the physical network (cables or Wi-Fi).",
+              "status": "missing",
+              "evidence": ""
+            }
+          ],
+          "wrong_statements": [
+            "Ginall Outlook"
+          ],
+          "rubric_source": "teacher",
+          "grading_mode": "full",
+          "scores_out_of_5": {
+            "similarity_model": 3.71,
+            "llm": 2.5,
+            "rubric_before_penalty": 2.0,
+            "wrong_statement_penalty": -0.5,
+            "rubric": 1.5,
+            "llm_rubric_average": 2.0,
+            "llm_calibrated": 4.14,
+            "final": 3.92
+          },
+          "seconds": 20.2
+        }
+      ],
+      "answers_graded": 1,
+      "answers_needing_review": 1
+    }
+  },
+  "rish_page-1": {
+    "digitize_response": {
+      "student_id": null,
+      "question": "Q1",
+      "answer_text": "R Pakil 3 : Gubject 15P\nName - RiSh\nRoll no - Ford Yeo = affini) 90 Dake ob /e1 Moot\n@1] 03t Mode) and email. sending Receiving p\u00a50e%1-\nAns rai OOT Mode} defines\u00bb Seven l ayes > tet each\nwith gama sespon gibililies in dako. Comro un iC abions:\nEmol \u00bb os proved: moves through bhese \u201cayers,\nen cap Gulaking\u00bb Susate at . each Step, which 19 bhen\nde - eNCapGul abed. an che yecieving. end: 3\na Appl ication Iayern . C Layev 2):\noJ) Emaul Applications: Coral, Outlook.) . srieiiaieets AUEe te\nnetwork ab thid ayes\nbJ Protocols. SMTP C Simple Moi! bon shew Peolaceh 3. Fou\ngending emails , IMAP C Intexnet Megsage Recess\n\\Probecol ) Fox yeceiving - Be nS\ncJ.the application Jaye bok the. email Message; Subjec!\nand abbachments From bre User. and pyepores Ehem\nfox bxangMmi65i0n by @ncading Fhe dato in bhe :covreub Formal\nnero \u2018| D 65 Presentation. loyer C layer 6) \u00b0-\nal Thig- layer banglates doko. inbo & Sbandoxd Formak\nthot:! born. gender and eceivet applications con\nsn beipyer -\nb7).Punc:tions Dobe encsypbion , weed Compress ion } and\nchovacker encoding\noJ) Exemple :- IF phe email Conboing: aktbachmen \u00e9s > ne\npresentarion layer enguveS these Ove Cowec bly encodey\nCeg- ASC)! Ox binory) For campabibiliky + 6M both\nends:",
+      "page": 1,
+      "marks_detected": null,
+      "ocr_confidence": 0.4,
+      "entities_found": [
+        {
+          "text": "Q1",
+          "label": "QUESTION_NUM",
+          "start_char": 85,
+          "end_char": 88
+        }
+      ]
+    },
+    "evaluate_request": {
+      "answer_key": {
+        "Q1": {
+          "question_text": "Explain the OSI model and how an email is sent and received through its layers.",
+          "reference_answer": "The OSI model has seven layers, and an email passes down through them on the sender's side (each layer adds its own header, called encapsulation) and back up on the receiver's side (de-encapsulation). Application layer (7): email programs such as Gmail or Outlook use SMTP to send mail and IMAP or POP3 to receive it. Presentation layer (6): formats and encodes the message and attachments, and can compress and encrypt them. Session layer (5): opens, manages and closes the session between the email client and the mail server. Transport layer (4): TCP splits the message into segments and makes sure they arrive reliably and in order. Network layer (3): IP adds addresses and routes the packets between the sender's and the receiver's mail servers. Data link and physical layers (2 and 1): the data is put into frames and sent as bits over cables or Wi-Fi.",
+          "maximum_marks": 10,
+          "rubric": [
+            "An email passes down through the seven OSI layers at the sender (encapsulation) and back up at the receiver (de-encapsulation).",
+            "Application layer: email programs use SMTP to send and IMAP or POP3 to receive emails.",
+            "Presentation layer: formats, encodes, compresses and encrypts the message and attachments.",
+            "Session layer: opens, manages and closes the session between the email client and the server.",
+            "Transport layer: TCP splits the message into segments and delivers them reliably.",
+            "Network layer: IP addresses and routes the packets between the mail servers.",
+            "Data link and physical layers: frames and bits are sent over the physical network (cables or Wi-Fi)."
+          ]
+        }
+      },
+      "pages": [
+        {
+          "student_id": null,
+          "question": "Q1",
+          "answer_text": "R Pakil 3 : Gubject 15P\nName - RiSh\nRoll no - Ford Yeo = affini) 90 Dake ob /e1 Moot\n@1] 03t Mode) and email. sending Receiving p\u00a50e%1-\nAns rai OOT Mode} defines\u00bb Seven l ayes > tet each\nwith gama sespon gibililies in dako. Comro un iC abions:\nEmol \u00bb os proved: moves through bhese \u201cayers,\nen cap Gulaking\u00bb Susate at . each Step, which 19 bhen\nde - eNCapGul abed. an che yecieving. end: 3\na Appl ication Iayern . C Layev 2):\noJ) Emaul Applications: Coral, Outlook.) . srieiiaieets AUEe te\nnetwork ab thid ayes\nbJ Protocols. SMTP C Simple Moi! bon shew Peolaceh 3. Fou\ngending emails , IMAP C Intexnet Megsage Recess\n\\Probecol ) Fox yeceiving - Be nS\ncJ.the application Jaye bok the. email Message; Subjec!\nand abbachments From bre User. and pyepores Ehem\nfox bxangMmi65i0n by @ncading Fhe dato in bhe :covreub Formal\nnero \u2018| D 65 Presentation. loyer C layer 6) \u00b0-\nal Thig- layer banglates doko. inbo & Sbandoxd Formak\nthot:! born. gender and eceivet applications con\nsn beipyer -\nb7).Punc:tions Dobe encsypbion , weed Compress ion } and\nchovacker encoding\noJ) Exemple :- IF phe email Conboing: aktbachmen \u00e9s > ne\npresentarion layer enguveS these Ove Cowec bly encodey\nCeg- ASC)! Ox binory) For campabibiliky + 6M both\nends:",
+          "page": 1,
+          "marks_detected": null,
+          "ocr_confidence": 0.4,
+          "entities_found": [
+            {
+              "text": "Q1",
+              "label": "QUESTION_NUM",
+              "start_char": 85,
+              "end_char": 88
+            }
+          ]
+        }
+      ],
+      "student_id": "E013"
+    },
+    "evaluate_response": {
+      "results": [
+        {
+          "question": "Q1",
+          "student_id": "E013",
+          "page": 1,
+          "pages": [
+            1
+          ],
+          "answer_text": "@1] 03t Mode) and email. sending Receiving p\u00a50e%1- Ans rai OOT Mode} defines\u00bb Seven l ayes > tet each with gama sespon gibililies in dako. Comro un iC abions: Emol \u00bb os proved: moves through bhese \u201cayers, en cap Gulaking\u00bb Susate at . each Step, which 19 bhen de - eNCapGul abed. an che yecieving. end: 3 a Appl ication Iayern . C Layev 2): oJ) Emaul Applications: Coral, Outlook.) . srieiiaieets AUEe te network ab thid ayes bJ Protocols. SMTP C Simple Moi! bon shew Peolaceh 3. Fou gending emails , IMAP C Intexnet Megsage Recess \\Probecol ) Fox yeceiving - Be nS cJ.the application Jaye bok the. email Message; Subjec! and abbachments From bre User. and pyepores Ehem fox bxangMmi65i0n by @ncading Fhe dato in bhe :covreub Formal nero \u2018| D 65 Presentation. loyer C layer 6) \u00b0- al Thig- layer banglates doko. inbo & Sbandoxd Formak thot:! born. gender and eceivet applications con sn beipyer - b7).Punc:tions Dobe encsypbion , weed Compress ion } and chovacker encoding oJ) Exemple :- IF phe email Conboing: aktbachmen \u00e9s > ne presentarion layer enguveS these Ove Cowec bly encodey Ceg- ASC)! Ox binory) For campabibiliky + 6M both ends:",
+          "removed_header": "R Pakil 3 : Gubject 15P Name - RiSh Roll no - Ford Yeo = affini) 90 Dake ob /e1 Moot",
+          "score": 7.0,
+          "maximum_score": 10.0,
+          "feedback": "Covered: An email passes down through the seven OSI layers at the sender (encapsulation) and back up at the receiver (de-encapsulation). Application layer: email programs use SMTP to send and IMAP or POP3 to receive emails. Presentation layer: formats, encodes, compresses and encrypts the message and attachments. | Missing: Session layer: opens, manages and closes the session between the email client and the server. Transport layer: TCP splits the message into segments and delivers them reliably. Network layer: IP addresses and routes the packets between the mail servers. Data link and physical layers: frames and bits are sent over the physical network (cables or Wi-Fi). | Your answer covers the main ideas of the OSI model and email transmission well, but there are some minor OCR errors. Keep up the good work!",
+          "confidence": 0.53,
+          "needs_human_review": true,
+          "review_reasons": [
+            "Low OCR confidence (0.4): check the transcription against the answer sheet.",
+            "Long answer (186 words): much longer than the answers the similarity model was trained on (95% had 45 words or fewer), so check the mark.",
+            "Low confidence (0.53): the similarity model and the LLM disagree.",
+            "The LLM score (4.5) and the rubric score (2.0) differ by 2 or more marks out of 5."
+          ],
+          "concepts": [
+            {
+              "concept": "An email passes down through the seven OSI layers at the sender (encapsulation) and back up at the receiver (de-encapsulation).",
+              "status": "present",
+              "evidence": "email moves through these layers, en cap Gulaking each Step, which 19 bhen de - eNCapGul abed."
+            },
+            {
+              "concept": "Application layer: email programs use SMTP to send and IMAP or POP3 to receive emails.",
+              "status": "present",
+              "evidence": "C Layev 2): oJ) Emaul Applications: Coral, Outlook.) . srieiiaieets AUEe te network ab thid ayes bJ Protocols. SMTP C Simple Moi! bon shew Peolaceh 3. Fou gending emails , IMAP C Intexnet Megsage Recess \", "
+            },
+            {
+              "concept": "Presentation layer: formats, encodes, compresses and encrypts the message and attachments.",
+              "status": "present",
+              "evidence": "Presentation. loyer C layer 6) \u00b0- al Thig- layer banglates doko. inbo & Sbandoxd Formak thot! born. gender and eceivet applications con sn beipyer - b7).Punc:tions Dobe encsypbion , weed Compress ion } and chovacker encoding"
+            },
+            {
+              "concept": "Session layer: opens, manages and closes the session between the email client and the server.",
+              "status": "missing",
+              "evidence": ""
+            },
+            {
+              "concept": "Transport layer: TCP splits the message into segments and delivers them reliably.",
+              "status": "missing",
+              "evidence": ""
+            },
+            {
+              "concept": "Network layer: IP addresses and routes the packets between the mail servers.",
+              "status": "missing",
+              "evidence": ""
+            },
+            {
+              "concept": "Data link and physical layers: frames and bits are sent over the physical network (cables or Wi-Fi).",
+              "status": "missing",
+              "evidence": ""
+            }
+          ],
+          "wrong_statements": [],
+          "rubric_source": "teacher",
+          "grading_mode": "full",
+          "scores_out_of_5": {
+            "similarity_model": 2.75,
+            "llm": 4.5,
+            "rubric_before_penalty": 2.0,
+            "wrong_statement_penalty": 0.0,
+            "rubric": 2.0,
+            "llm_rubric_average": 3.25,
+            "llm_calibrated": 4.48,
+            "final": 3.61
+          },
+          "seconds": 27.88
+        }
+      ],
+      "answers_graded": 1,
+      "answers_needing_review": 1
+    }
+  }
+}

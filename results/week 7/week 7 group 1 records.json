@@ -1,0 +1,34 @@
+{
+  "aayush_page-01": {
+    "student_id": null,
+    "question": "Q1",
+    "answer_text": "ISP Assignment % - Eool hayush Nayak\nQL OS! Model in Email Sending and Recening\nIn the OS| (Open Systems Interconnection) Model, email\nCommunication follows a specific path\nthrough the layers, with each layer contributing to efficient data\nexchange. Here's how email\ntypically moves through each OSI layer:\nApplication Layer (Layer 7): This layer interacts with email\napplications (6.4, Ginall\nOutlook) using protocols lke SMTP (Simple Mail Transfer Protocol)\nfor sending and\nIMAP/POP for recening emails. Users Compose an email, and the\nemail application\nprepares it for transter over t he network\n2. Presentation Layer (Layer 6): This layer converts data into a\nformat suitable for the\napplication layer, handing encryption and compression. I ensures\nthat the email\ncontent (ike attachments) is properly formatted for both sender\nand recipient.\n%. Session Layer (Layer %) This layer manages the session\nbetween email servers and\nclents. tt establ",
+    "page": 1,
+    "marks_detected": null,
+    "ocr_confidence": 0.82,
+    "entities_found": [
+      {
+        "text": "Q1",
+        "label": "QUESTION_NUM",
+        "start_char": 37,
+        "end_char": 39
+      }
+    ]
+  },
+  "rish_page-1": {
+    "student_id": null,
+    "question": "Q1",
+    "answer_text": "R Pakil 3 : Gubject 15P\nName - RiSh\nRoll no - Ford Yeo = affini) 90 Dake ob /e1 Moot\n@1] 03t Mode) and email. sending Receiving p\u00a50e%1-\nAns rai OOT Mode} defines\u00bb Seven l ayes > tet each\nwith gama sespon gibililies in dako. Comro un iC abions:\nEmol \u00bb os proved: moves through bhese \u201cayers,\nen cap Gulaking\u00bb Susate at . each Step, which 19 bhen\nde - eNCapGul abed. an che yecieving. end: 3\na Appl ication Iayern . C Layev 2):\noJ) Emaul Applications: Coral, Outlook.) . srieiiaieets AUEe te\nnetwork ab thid ayes\nbJ Protocols. SMTP C Simple Moi! bon shew Peolaceh 3. Fou\ngending emails , IMAP C Intexnet Megsage Recess\n\\Probecol ) Fox yeceiving - Be nS\ncJ.the application Jaye bok the. email Message; Subjec!\nand abbachments From bre User. and pyepores Ehem\nfox bxangMmi65i0n by @ncading Fhe dato in bhe :covreub Formal\nnero \u2018| D 65 Presentation. loyer C layer 6) \u00b0-\nal Thig- layer banglates doko. inbo & Sbandoxd Formak\nthot:! born. gender and eceivet applications con\nsn beipyer -\nb7).Punc:tions Dobe encsypbion , weed Compress ion } and\nchovacker encoding\noJ) Exemple :- IF phe email Conboing: aktbachmen \u00e9s > ne\npresentarion layer enguveS these Ove Cowec bly encodey\nCeg- ASC)! Ox binory) For campabibiliky + 6M both\nends:",
+    "page": 1,
+    "marks_detected": null,
+    "ocr_confidence": 0.4,
+    "entities_found": [
+      {
+        "text": "Q1",
+        "label": "QUESTION_NUM",
+        "start_char": 85,
+        "end_char": 88
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "description": "Example upload in Group 1's digitizer format: 6 real Mohler answers (2 students, 3 questions). The OCR confidence values are made up to show the low-confidence rule.",
+  "answer_key": {
+    "Q1": {
+      "question_text": "What is a stack?",
+      "reference_answer": "A data structure that can store elements, which has the property that the last item added will be the first to be removed (or last-in-first-out)",
+      "maximum_marks": 5
+    },
+    "Q2": {
+      "question_text": "What is a recursive function?",
+      "reference_answer": "A function that calls itself.",
+      "maximum_marks": 5
+    },
+    "Q3": {
+      "question_text": "What is the difference between an array declared as static, and one that is not?",
+      "reference_answer": "The arrays declared as static live throughout the life of the program; that is, they are initialized only once, when the function that declares the array it is first called.",
+      "maximum_marks": 10
+    }
+  },
+  "answers": [
+    {
+      "student_id": "S11",
+      "question": "Q1",
+      "answer_text": "Stores a set of elements in a particular order based on the principle of Last In First Out (LIFO).",
+      "page": 1,
+      "confidence": 0.96
+    },
+    {
+      "student_id": "S12",
+      "question": "Q1",
+      "answer_text": "a finite ordered list with zero or more elements",
+      "page": 1,
+      "confidence": 0.91
+    },
+    {
+      "student_id": "S11",
+      "question": "Q2",
+      "answer_text": "a function that calls itself until the base cases are met.",
+      "page": 2,
+      "confidence": 0.88
+    },
+    {
+      "student_id": "S12",
+      "question": "Q2",
+      "answer_text": "A base case that calls upon itself until the problem becomes smaller and terminates.",
+      "page": 2,
+      "confidence": 0.72
+    },
+    {
+      "student_id": "S11",
+      "question": "Q3",
+      "answer_text": "the static array exists for the duration of the program",
+      "page": 3,
+      "confidence": 0.94
+    },
+    {
+      "student_id": "S12",
+      "question": "Q3",
+      "answer_text": "A static member prevents naming conflicts (not put into global namespace) while allowing for information hiding (private, public).",
+      "page": 3,
+      "confidence": 0.85
+    }
+  ],
+  "human_marks": {
+    "S11 Q1": 5.0,
+    "S12 Q1": 2.0,
+    "S11 Q2": 5.0,
+    "S12 Q2": 3.75,
+    "S11 Q3": 9.0,
+    "S12 Q3": 6.0
+  }
+}

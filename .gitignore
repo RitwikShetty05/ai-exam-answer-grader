@@ -2,7 +2,13 @@ __pycache__/
 .DS_Store
 .streamlit/secrets.toml
 *.docx
-*.pdf
-.ipynb_checkpoints/
 *.zip
+.ipynb_checkpoints/
 demo screenshots/
+models/week 7/
+web/frontend/node_modules/
+web/backend/db.sqlite3
+web/backend/static files/
+.pytest_cache/
+*.pdf
+!docs/**/*.pdf

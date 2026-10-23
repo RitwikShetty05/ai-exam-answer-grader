@@ -1,11 +1,13 @@
 import os
+import sys
 import json
 import requests
 import pandas as pd
 import streamlit as st
 import charts
 
-FOLDER = os.path.dirname(os.path.abspath(__file__))
+FOLDER = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(FOLDER, "src"))
 
 st.set_page_config(page_title="AI Exam Answer Grader", layout="wide")
 
@@ -17,7 +19,7 @@ except Exception:
 
 GRADER_MODE = os.environ.get("GRADER_MODE", "api")
 
-with open(os.path.join(FOLDER, "demo exam.json")) as file:
+with open(os.path.join(FOLDER, "data", "demo exam.json")) as file:
     demo_exam = json.load(file)
 
 
