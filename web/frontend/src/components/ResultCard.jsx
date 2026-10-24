@@ -2,6 +2,7 @@ import { useState } from "react"
 import { postJson } from "../api.js"
 import { ConfidenceCurve, ScoreWaterfall } from "./charts.jsx"
 import { ConfidenceBar, Metric, StatusBadge } from "./ui.jsx"
+import { AnswerPipeline } from "./Pipeline.jsx"
 
 function TeacherDecision({ answerId, result, onSaved }) {
   const [mark, setMark] = useState(String(result.score))
@@ -72,6 +73,9 @@ export default function ResultCard({ result, answerId, humanMark, reliability, o
       </div>
 
       <div style={{ marginTop: 14 }}>{banners}</div>
+
+      <div className="section-label">Pipeline for this answer</div>
+      <AnswerPipeline result={result} />
 
       {result.removed_header && <p className="hint" style={{ marginTop: 10 }}>Header removed before grading: “{result.removed_header}”{result.pages ? " · pages " + result.pages.join(", ") : ""}</p>}
 

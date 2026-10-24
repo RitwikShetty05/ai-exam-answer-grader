@@ -6,12 +6,14 @@ import ScanSheets from "./pages/ScanSheets.jsx"
 import ReviewQueue from "./pages/ReviewQueue.jsx"
 import Evaluation from "./pages/Evaluation.jsx"
 import UseApi from "./pages/UseApi.jsx"
+import HowItWorks from "./pages/HowItWorks.jsx"
 
 const pages = [
   { key: "grade", label: "Grade one answer" },
   { key: "sheets", label: "Answer sheets" },
   { key: "scan", label: "Scanned sheets (Group 1)" },
   { key: "review", label: "Review queue" },
+  { key: "pipeline", label: "How it works" },
   { key: "evaluation", label: "Evaluation results" },
   { key: "api", label: "Use the API" },
 ]
@@ -81,6 +83,8 @@ export default function App() {
     content = <ScanSheets examples={examples} reliability={reliability} status={status} onGraded={refreshStatus} />
   } else if (page === "review") {
     content = <ReviewQueue reliability={reliability} onChanged={refreshStatus} />
+  } else if (page === "pipeline") {
+    content = <HowItWorks />
   } else if (page === "evaluation") {
     content = <Evaluation evaluation={evaluation} />
   } else {
