@@ -193,19 +193,35 @@ export function Benchmark({ rows, metric, title }) {
     }
     data.push({ name: row.method, value: round(row[metric], 3), error: round(row[metric + "_sd"], 3), colour: colour })
   }
+  let largest = 0
+  for (const row of data) {
+    largest = Math.max(largest, row.value + row.error)
+  }
+  const axisMax = Math.ceil(largest * 1.2 * 10) / 10
+
+  function valueLabel(props) {
+    const row = data[props.index]
+    if (!row || !props.width || row.value === 0) {
+      return null
+    }
+    const pixelsPerMark = props.width / row.value
+    const errorEnd = props.x + props.width + row.error * pixelsPerMark
+    return <text x={errorEnd + 6} y={props.y + props.height / 2} dy={4} fontSize={11} fill={colours.ink}>{row.value}</text>
+  }
+
   return (
     <div>
       <div className="chart-title">{title}</div>
       <ResponsiveContainer width="100%" height={250}>
-        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 48, left: 10, bottom: 4 }}>
+        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, left: 10, bottom: 4 }}>
           <CartesianGrid stroke={colours.grid} horizontal={false} />
-          <XAxis type="number" tick={axisTick} domain={[0, "auto"]} />
+          <XAxis type="number" tick={axisTick} domain={[0, axisMax]} />
           <YAxis type="category" dataKey="name" width={200} tick={axisTick} />
           <Tooltip cursor={{ fill: "rgba(42,120,214,0.06)" }} content={<SimpleTooltip render={(row) => <span>{row.name}: <strong>{row.value}</strong> ± {row.error} (SD over 5 folds)</span>} />} />
           <Bar dataKey="value" barSize={18} radius={[0, 3, 3, 0]} isAnimationActive={false}>
             {data.map((row) => <Cell key={row.name} fill={row.colour} />)}
             <ErrorBar dataKey="error" width={4} stroke={colours.inkSoft} direction="x" />
-            <LabelList dataKey="value" position="right" offset={22} style={{ fontSize: 11, fill: colours.ink }} />
+            <LabelList dataKey="value" content={valueLabel} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
