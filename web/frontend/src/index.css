@@ -343,6 +343,16 @@ input:focus, textarea:focus, select:focus {
   background: var(--surface-soft);
 }
 
+.button.danger {
+  background: var(--surface);
+  color: var(--bad);
+  border-color: #e7a3a3;
+}
+
+.button.danger:hover {
+  background: var(--bad-soft);
+}
+
 .button.small {
   padding: 5px 10px;
   font-size: 0.82rem;

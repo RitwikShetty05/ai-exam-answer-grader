@@ -17,6 +17,7 @@ urlpatterns = [
     path("api/grade-scan", views.grade_scan),
     path("api/answers", views.list_answers),
     path("api/answers/<int:answer_id>/review", views.review_answer),
+    path("api/answers/<int:answer_id>/remove-review", views.remove_review),
     path("api/answers.csv", views.export_answers),
     path("api/evaluation", views.evaluation),
 ]

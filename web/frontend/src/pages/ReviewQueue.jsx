@@ -46,6 +46,24 @@ export default function ReviewQueue({ reliability, onChanged }) {
     }
   }
 
+  async function removeReview(answer) {
+    const who = (answer.student_id || "this answer") + " " + (answer.question || "")
+    if (!window.confirm("Remove the teacher's review for " + who + "? The answer goes back to the queue with its recommended mark.")) {
+      return
+    }
+    try {
+      const reply = await postJson("/api/answers/" + answer.id + "/remove-review", {})
+      const updated = answers.map((item) => (item.id === answer.id ? reply.answer : item))
+      setAnswers(updated)
+      setMarks({ ...marks, [answer.id]: String(reply.answer.recommended_score) })
+      setComments({ ...comments, [answer.id]: "" })
+      setMessages({ ...messages, [answer.id]: "Review removed" })
+      onChanged()
+    } catch (problem) {
+      setMessages({ ...messages, [answer.id]: problem.message })
+    }
+  }
+
   if (answers === null) {
     return <div className="empty"><Spinner dark /> Loading saved answers…</div>
   }
@@ -69,7 +87,7 @@ export default function ReviewQueue({ reliability, onChanged }) {
     <div>
       <div className="page-head">
         <h1>Review queue</h1>
-        <p>Every answer graded in this app is saved in the database with the recommended mark, the reasons it was flagged and the teacher's decision. Flagged answers wait here until a teacher confirms or changes the mark.</p>
+        <p>Everything a teacher needs in one place: every answer graded in this app, its recommended mark and why it was flagged. Confirm or change the mark and save it, remove a review to send the answer back to the queue, open the details, or download all marks as CSV.</p>
       </div>
       <div className="card">
         <div className="row spread">
@@ -87,13 +105,16 @@ export default function ReviewQueue({ reliability, onChanged }) {
         <div className="table-wrap" style={{ marginTop: 14 }}>
           <table>
             <thead>
-              <tr><th>Status</th><th>Graded</th><th>Source</th><th>Student</th><th>Question</th><th className="number">Recommended</th><th className="number">Confidence</th><th>Text</th><th>Final mark</th><th>Comment</th><th></th></tr>
+              <tr><th>Status</th><th>Graded</th><th>Source</th><th>Student</th><th>Question</th><th className="number">Recommended</th><th className="number">Confidence</th><th>Text</th><th>Final mark</th><th>Comment</th><th>Teacher actions</th></tr>
             </thead>
             <tbody>
               {shown.length === 0 && <tr><td colSpan={11} className="empty">Nothing here yet.</td></tr>}
               {shown.map((answer) => (
                 <tr key={answer.id}>
-                  <td><ReviewBadge needsReview={answer.needs_review} reviewed={answer.reviewed} /></td>
+                  <td>
+                    <ReviewBadge needsReview={answer.needs_review} reviewed={answer.reviewed} />
+                    {answer.reviewed && answer.reviewed_at && <div className="hint" style={{ whiteSpace: "nowrap" }}>{new Date(answer.reviewed_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</div>}
+                  </td>
                   <td style={{ whiteSpace: "nowrap" }}>{new Date(answer.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</td>
                   <td>{answer.source}</td>
                   <td>{answer.student_id || "–"}</td>
@@ -105,7 +126,8 @@ export default function ReviewQueue({ reliability, onChanged }) {
                   <td><input value={comments[answer.id] || ""} onChange={(event) => setComments({ ...comments, [answer.id]: event.target.value })} style={{ minWidth: 120 }} /></td>
                   <td>
                     <div className="row" style={{ flexWrap: "nowrap" }}>
-                      <button className="button secondary small" onClick={() => save(answer)}>Save</button>
+                      <button className="button secondary small" onClick={() => save(answer)}>{answer.reviewed ? "Update" : "Save"}</button>
+                      {answer.reviewed && <button className="button danger small" onClick={() => removeReview(answer)}>Remove review</button>}
                       <button className="button secondary small" onClick={() => setOpen(open === answer.id ? null : answer.id)}>{open === answer.id ? "Close" : "Details"}</button>
                     </div>
                     {messages[answer.id] && messages[answer.id] !== "saved" && <div className="hint">{messages[answer.id]}</div>}

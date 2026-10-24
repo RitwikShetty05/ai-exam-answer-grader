@@ -68,7 +68,7 @@ src/                   the reusable asset
 models/                fine-tuned cross-encoder, calibration, confidence model, rubric cache, settings
 data/                  sample exam in Group 1's format, Group 1 upload example, answer key for Group 1's pages
 web/                   deployable teacher application
-  backend/             Django: saves graded answers and teacher decisions (SQLite), serves the React app
+  backend/             Django: saves graded answers and teacher decisions (SQLite), review queue API, serves the React app
   frontend/            React (Vite + Recharts) teacher interface
 demo/                  earlier Streamlit prototype (Week 6)
 notebooks/             Week 6 (models, evaluation, API tests) and Week 7 (Group 1 integration, OCR experiment)
@@ -118,9 +118,10 @@ Open http://localhost:8001. The built React app is already in `web/frontend/dist
 
 ```bash
 pytest tests
+cd web/backend && python manage.py test grading
 ```
 
-They do not need the LLM.
+They do not need the LLM: 23 tests for the grader, the Group 1 adapter and the API, and 5 for the web app's teacher reviews.
 
 ## Use it from another application
 

@@ -69,6 +69,12 @@ def exam_name(answer):
     return answer.exam.name
 
 
+def reviewed_time(answer):
+    if answer.reviewed_at is None:
+        return None
+    return answer.reviewed_at.isoformat()
+
+
 def answer_to_dict(answer):
     return {
         "id": answer.id,
@@ -90,6 +96,7 @@ def answer_to_dict(answer):
         "teacher_comment": answer.teacher_comment,
         "final_mark": answer.final_mark(),
         "reviewed": answer.reviewed_at is not None,
+        "reviewed_at": reviewed_time(answer),
         "created_at": answer.created_at.isoformat(),
         "result": answer.result,
     }
@@ -351,6 +358,19 @@ def review_answer(request, answer_id):
     answer.teacher_mark = teacher_mark
     answer.teacher_comment = body.get("teacher_comment", "")
     answer.reviewed_at = timezone.now()
+    answer.save()
+    return JsonResponse({"answer": answer_to_dict(answer)})
+
+
+@require_POST
+def remove_review(request, answer_id):
+    try:
+        answer = GradedAnswer.objects.get(id=answer_id)
+    except GradedAnswer.DoesNotExist:
+        return error_reply("Answer not found.", 404)
+    answer.teacher_mark = None
+    answer.teacher_comment = ""
+    answer.reviewed_at = None
     answer.save()
     return JsonResponse({"answer": answer_to_dict(answer)})
 
