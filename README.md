@@ -121,7 +121,7 @@ pytest tests
 cd web/backend && python manage.py test grading
 ```
 
-They do not need the LLM: 23 tests for the grader, the Group 1 adapter and the API, and 5 for the web app's teacher reviews.
+They do not need the LLM: 23 tests for the grader, the Group 1 adapter and the API, and 6 for the web app's teacher reviews.
 
 ## Use it from another application
 

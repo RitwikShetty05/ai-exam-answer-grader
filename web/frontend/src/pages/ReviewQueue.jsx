@@ -64,6 +64,24 @@ export default function ReviewQueue({ reliability, onChanged }) {
     }
   }
 
+  async function removeAnswer(answer) {
+    const who = (answer.student_id || "this answer") + " " + (answer.question || "")
+    if (!window.confirm("Remove " + who + " (" + answer.recommended_score + " / " + answer.maximum_score + ") from the queue? This deletes the graded answer and cannot be undone.")) {
+      return
+    }
+    try {
+      await postJson("/api/answers/" + answer.id + "/delete", {})
+      const remaining = answers.filter((item) => item.id !== answer.id)
+      setAnswers(remaining)
+      if (open === answer.id) {
+        setOpen(null)
+      }
+      onChanged()
+    } catch (problem) {
+      setMessages({ ...messages, [answer.id]: problem.message })
+    }
+  }
+
   if (answers === null) {
     return <div className="empty"><Spinner dark /> Loading saved answers…</div>
   }
@@ -87,7 +105,7 @@ export default function ReviewQueue({ reliability, onChanged }) {
     <div>
       <div className="page-head">
         <h1>Review queue</h1>
-        <p>Everything a teacher needs in one place: every answer graded in this app, its recommended mark and why it was flagged. Confirm or change the mark and save it, remove a review to send the answer back to the queue, open the details, or download all marks as CSV.</p>
+        <p>Everything a teacher needs in one place: every answer graded in this app, its recommended mark and why it was flagged. Confirm or change the mark and save it, remove a review to send the answer back to the queue, remove an answer that was graded by mistake, open the details, or download all marks as CSV.</p>
       </div>
       <div className="card">
         <div className="row spread">
@@ -128,6 +146,7 @@ export default function ReviewQueue({ reliability, onChanged }) {
                     <div className="row" style={{ flexWrap: "nowrap" }}>
                       <button className="button secondary small" onClick={() => save(answer)}>{answer.reviewed ? "Update" : "Save"}</button>
                       {answer.reviewed && <button className="button danger small" onClick={() => removeReview(answer)}>Remove review</button>}
+                      {!answer.reviewed && <button className="button danger small" onClick={() => removeAnswer(answer)}>Remove</button>}
                       <button className="button secondary small" onClick={() => setOpen(open === answer.id ? null : answer.id)}>{open === answer.id ? "Close" : "Details"}</button>
                     </div>
                     {messages[answer.id] && messages[answer.id] !== "saved" && <div className="hint">{messages[answer.id]}</div>}

@@ -50,3 +50,10 @@ class ReviewTests(TestCase):
         reply = self.client.get("/api/answers")
         self.assertEqual(reply.status_code, 200)
         self.assertEqual(len(reply.json()["answers"]), 1)
+
+    def test_delete_answer(self):
+        reply = self.post("/api/answers/" + str(self.answer.id) + "/delete", {})
+        self.assertEqual(reply.status_code, 200)
+        self.assertEqual(GradedAnswer.objects.count(), 0)
+        again = self.post("/api/answers/" + str(self.answer.id) + "/delete", {})
+        self.assertEqual(again.status_code, 404)

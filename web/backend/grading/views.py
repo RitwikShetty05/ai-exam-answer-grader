@@ -375,6 +375,16 @@ def remove_review(request, answer_id):
     return JsonResponse({"answer": answer_to_dict(answer)})
 
 
+@require_POST
+def delete_answer(request, answer_id):
+    try:
+        answer = GradedAnswer.objects.get(id=answer_id)
+    except GradedAnswer.DoesNotExist:
+        return error_reply("Answer not found.", 404)
+    answer.delete()
+    return JsonResponse({"deleted": answer_id})
+
+
 @require_GET
 def export_answers(request):
     response = HttpResponse(content_type="text/csv")
