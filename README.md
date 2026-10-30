@@ -36,7 +36,7 @@ How a mark is made:
 
 ## Results (honest summary)
 
-Evaluated on 450 Mohler answers to questions the models had never seen (5-fold cross-validation grouped by question), weighted to represent all 2,254 answers. Values are mean ± SD over the folds.
+Evaluated on 450 Mohler answers to questions the models had never seen (5-fold cross-validation grouped by question), weighted to represent all 2,264 answers. Values are mean ± SD over the folds.
 
 | Method | MAE (marks out of 5) | Within ±1 | Pearson r |
 |---|---|---|---|

@@ -46,7 +46,7 @@ export default function Evaluation({ evaluation }) {
     <div>
       <div className="page-head">
         <h1>Evaluation results</h1>
-        <p>Measured results, not demo examples. Weeks 5–6: 450 Mohler answers to questions the models had never seen, weighted to represent all 2,254 answers. Week 7: Group 1's real scanned pages and a controlled OCR-noise test.</p>
+        <p>Measured results, not demo examples. Weeks 5–6: 450 Mohler answers to questions the models had never seen, weighted to represent all 2,264 answers. Week 7: Group 1's real scanned pages and a controlled OCR-noise test.</p>
       </div>
 
       <div className="grid-4">
