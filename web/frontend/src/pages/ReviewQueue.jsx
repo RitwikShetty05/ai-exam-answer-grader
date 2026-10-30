@@ -121,7 +121,7 @@ export default function ReviewQueue({ reliability, onChanged }) {
         </div>
         <div style={{ marginTop: 10 }}><ErrorBanner message={error} /></div>
         <div className="table-wrap" style={{ marginTop: 14 }}>
-          <table>
+          <table className="queue-table">
             <thead>
               <tr><th>Status</th><th>Graded</th><th>Source</th><th>Student</th><th>Question</th><th className="number">Recommended</th><th className="number">Confidence</th><th>Text</th><th>Final mark</th><th>Comment</th><th>Teacher actions</th></tr>
             </thead>
@@ -131,19 +131,19 @@ export default function ReviewQueue({ reliability, onChanged }) {
                 <tr key={answer.id}>
                   <td>
                     <ReviewBadge needsReview={answer.needs_review} reviewed={answer.reviewed} />
-                    {answer.reviewed && answer.reviewed_at && <div className="hint" style={{ whiteSpace: "nowrap" }}>{new Date(answer.reviewed_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</div>}
+                    {answer.reviewed && answer.reviewed_at && <div className="hint">{new Date(answer.reviewed_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</div>}
                   </td>
-                  <td style={{ whiteSpace: "nowrap" }}>{new Date(answer.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</td>
+                  <td>{new Date(answer.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</td>
                   <td>{answer.source}</td>
                   <td>{answer.student_id || "–"}</td>
                   <td>{answer.question || "–"}</td>
                   <td className="number">{answer.recommended_score} / {answer.maximum_score}</td>
                   <td className="number">{Math.round(answer.confidence * 100)}%</td>
                   <td><OcrBadge value={answer.ocr_confidence} /></td>
-                  <td><input type="number" step="0.5" min="0" max={answer.maximum_score} value={marks[answer.id] || ""} onChange={(event) => setMarks({ ...marks, [answer.id]: event.target.value })} style={{ width: 80 }} /></td>
-                  <td><input value={comments[answer.id] || ""} onChange={(event) => setComments({ ...comments, [answer.id]: event.target.value })} style={{ minWidth: 120 }} /></td>
+                  <td><input type="number" step="0.5" min="0" max={answer.maximum_score} value={marks[answer.id] || ""} onChange={(event) => setMarks({ ...marks, [answer.id]: event.target.value })} style={{ width: 64 }} /></td>
+                  <td><input value={comments[answer.id] || ""} onChange={(event) => setComments({ ...comments, [answer.id]: event.target.value })} style={{ width: 120 }} /></td>
                   <td>
-                    <div className="row" style={{ flexWrap: "nowrap" }}>
+                    <div className="teacher-actions">
                       <button className="button secondary small" onClick={() => save(answer)}>{answer.reviewed ? "Update" : "Save"}</button>
                       {answer.reviewed && <button className="button danger small" onClick={() => removeReview(answer)}>Remove review</button>}
                       {!answer.reviewed && <button className="button danger small" onClick={() => removeAnswer(answer)}>Remove</button>}

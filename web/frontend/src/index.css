@@ -358,6 +358,22 @@ input:focus, textarea:focus, select:focus {
   font-size: 0.82rem;
 }
 
+.teacher-actions {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 6px;
+}
+
+.teacher-actions .button {
+  white-space: nowrap;
+  text-align: center;
+}
+
+.queue-table th,
+.queue-table td {
+  padding: 8px 7px;
+}
+
 .button:disabled {
   opacity: 0.55;
   cursor: wait;
