@@ -23,6 +23,9 @@ GROUP1_ANSWER_KEY_FILE = SERVICE_FOLDER / "data" / "group 1 answer key.json"
 CHART_SUMMARY_FILE = SERVICE_FOLDER / "results" / "week 6 chart summary.json"
 GROUP1_FOLDER = Path(os.environ.get("GROUP1_DIGITIZER_PATH", str(SERVICE_FOLDER.parent / "Group 1 digitizer")))
 WEEK7_RESULTS = SERVICE_FOLDER / "results" / "week 7"
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
+CODE_GUIDE_FILE = SERVICE_FOLDER / "data" / "code guide.json"
+FRONTEND_PACKAGE_FILE = WEB_FOLDER / "frontend" / "package.json"
 
 INSTALLED_APPS = [
     "django.contrib.admin",

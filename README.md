@@ -61,15 +61,18 @@ Full details are in [docs/reports](docs/reports).
 ```
 README.md              this file
 requirements.txt       Python packages
+Start Grader.command   double-click to start the whole app on a Mac (Start Grader.bat on Windows)
+Stop Grader.command    double-click to stop it (Stop Grader.bat on Windows)
+launcher.py            starts and stops Ollama, the grading API and the web app (used by the four files above)
 src/                   the reusable asset
   grader.py            grading module: evaluate_answer(), evaluate_group1_record(), make_rubric()
   group1.py            adapter for Group 1's Handwritten Exam Digitizer (pages -> answers)
   api.py               FastAPI web service (6 endpoints, documentation at /docs)
 models/                fine-tuned cross-encoder, calibration, confidence model, rubric cache, settings
-data/                  sample exam in Group 1's format, Group 1 upload example, answer key for Group 1's pages
-web/                   deployable teacher application
-  backend/             Django: saves graded answers and teacher decisions (SQLite), review queue API, serves the React app
-  frontend/            React (Vite + Recharts) teacher interface
+data/                  sample exam in Group 1's format, Group 1 upload example, answer key for Group 1's pages, code guide for the Code explorer
+web/                   local teacher web app
+  backend/             Django: saves graded answers and teacher decisions (SQLite), review queue, code tour, shutdown; serves the React app
+  frontend/            React (Vite + Recharts) interface: grading, review queue, end-to-end pipeline, tech stack, code explorer
 demo/                  earlier Streamlit prototype (Week 6)
 notebooks/             Week 6 (models, evaluation, API tests) and Week 7 (Group 1 integration, OCR experiment)
 results/               evaluation tables and charts (Weeks 6 and 7)
@@ -82,7 +85,7 @@ The notebooks run from the repository root. They read the earlier weeks' results
 ## How to run it
 
 **Requirements:**
-- macOS or Linux with Python 3.10, plus [Ollama](https://ollama.com) for the local LLM.
+- macOS or Linux with Python 3.10, plus [Ollama](https://ollama.com) for the local LLM. Windows can use the `.bat` start and stop files (not yet tested on a Windows computer).
 - Node.js only if you rebuild the React app.
 - Tesseract only for Group 1's digitizer.
 
@@ -90,6 +93,14 @@ The notebooks run from the repository root. They read the earlier weeks' results
 pip install -r requirements.txt
 ollama pull qwen2.5:7b-instruct
 ```
+
+**One click (recommended):** double-click `Start Grader.command` on a Mac or `Start Grader.bat` on Windows. It starts Ollama (if it is not already running), the grading API and the web app, waits until they answer, and opens http://localhost:8001. It uses the conda environment `ml` if there is one; set `GRADER_PYTHON` to use another Python. Server output goes to the `logs` folder.
+
+To stop everything, press **Shut down the app** in the sidebar, or double-click `Stop Grader.command` / `Stop Grader.bat`. An Ollama that was already running before the app started is left running.
+
+The web app has tabs for grading, the review queue, an animated **end-to-end pipeline** (with a guided tour and a live run of a real answer), the **tech stack** (with the versions installed on this computer), a **code explorer** that explains every function in simple words, the evaluation results and the API.
+
+**Or start the parts by hand:**
 
 **1. The local LLM:** open the Ollama app, or run `ollama serve`.
 
@@ -121,7 +132,7 @@ pytest tests
 cd web/backend && python manage.py test grading
 ```
 
-They do not need the LLM: 23 tests for the grader, the Group 1 adapter and the API, and 6 for the web app's teacher reviews.
+They do not need the LLM: 24 tests for the grader, the Group 1 adapter and the API, and 12 for the web app (teacher reviews, the code tour, the tech stack and the shutdown button).
 
 ## Use it from another application
 

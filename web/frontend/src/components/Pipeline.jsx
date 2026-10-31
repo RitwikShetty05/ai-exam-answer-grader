@@ -1,5 +1,3 @@
-import { useState } from "react"
-
 export const pipelineSteps = [
   {
     key: "scan",
@@ -145,9 +143,18 @@ const kindColours = {
   teacher: { background: "#0f1b2d", border: "#0f1b2d", label: "#7fb2ee" },
 }
 
-const stageOrder = ["Input", "Pre-processing", "NLP models", "Post-processing", "Trust", "Teacher"]
+export const stageOrder = ["Input", "Pre-processing", "NLP models", "Post-processing", "Trust", "Teacher"]
 
-function StepBox({ step, selected, onSelect }) {
+export function stepPosition(key) {
+  for (let position = 0; position < pipelineSteps.length; position++) {
+    if (pipelineSteps[position].key === key) {
+      return position
+    }
+  }
+  return 0
+}
+
+function StepBox({ step, selected, passed, order, onSelect }) {
   const colours = kindColours[step.kind]
   let textColour = "var(--ink)"
   let subColour = "var(--ink-soft)"
@@ -155,65 +162,68 @@ function StepBox({ step, selected, onSelect }) {
     textColour = "#ffffff"
     subColour = "#c9d4e3"
   }
+  let className = "pipe-step"
+  if (selected) {
+    className = className + " selected"
+  }
+  if (passed) {
+    className = className + " passed"
+  }
   return (
     <button
-      className={"pipe-step" + (selected ? " selected" : "")}
-      style={{ background: colours.background, borderColor: colours.border }}
+      className={className}
+      style={{ background: colours.background, borderColor: colours.border, "--glow": colours.border, "--i": order }}
       onClick={() => onSelect(step.key)}
     >
       <span className="pipe-title" style={{ color: textColour }}>{step.title}</span>
       <span className="pipe-short" style={{ color: subColour }}>{step.short}</span>
+      {passed && <span className="pipe-tick">✓</span>}
     </button>
   )
 }
 
-export function PipelineDiagram() {
-  const [selected, setSelected] = useState("b2")
-  let chosen = pipelineSteps[0]
-  for (const step of pipelineSteps) {
-    if (step.key === selected) {
-      chosen = step
-    }
-  }
+export function PipelineDiagram({ selected, onSelect, passedUntil, playing }) {
   return (
-    <div className="grid-pipeline">
-      <div className="pipe-board">
-        {stageOrder.map((stage, position) => (
-          <div key={stage}>
-            <div className="pipe-row">
-              <div className="pipe-stage">{stage}</div>
-              <div className={"pipe-steps" + (stage === "NLP models" ? " parallel" : "")}>
-                {pipelineSteps.filter((step) => step.stage === stage).map((step, index, list) => (
-                  <div key={step.key} className="pipe-cell">
-                    <StepBox step={step} selected={selected === step.key} onSelect={setSelected} />
-                    {stage !== "NLP models" && stage !== "Input" && index < list.length - 1 && <span className="pipe-arrow-right">→</span>}
-                  </div>
-                ))}
-              </div>
+    <div className={"pipe-board" + (playing ? " playing" : "")}>
+      {stageOrder.map((stage, position) => (
+        <div key={stage}>
+          <div className="pipe-row">
+            <div className="pipe-stage">{stage}</div>
+            <div className={"pipe-steps" + (stage === "NLP models" ? " parallel" : "")}>
+              {pipelineSteps.filter((step) => step.stage === stage).map((step, index, list) => (
+                <div key={step.key} className="pipe-cell">
+                  <StepBox step={step} order={stepPosition(step.key)} selected={selected === step.key} passed={passedUntil > stepPosition(step.key)} onSelect={onSelect} />
+                  {stage !== "NLP models" && stage !== "Input" && index < list.length - 1 && <span className="pipe-arrow-right"><i /></span>}
+                </div>
+              ))}
             </div>
-            {position < stageOrder.length - 1 && <div className="pipe-arrow-down">↓</div>}
           </div>
-        ))}
-        <div className="legend" style={{ marginTop: 14 }}>
-          <span><i style={{ background: "#eb6834" }} />Group 1 integration (Week 7)</span>
-          <span><i style={{ background: "#2a78d6" }} />NLP models and processing</span>
-          <span><i style={{ background: "#1baf7a" }} />Trust and review</span>
-          <span><i style={{ background: "#0f1b2d" }} />Teacher</span>
+          {position < stageOrder.length - 1 && <div className="pipe-arrow-down"><i /></div>}
         </div>
+      ))}
+      <div className="legend" style={{ marginTop: 14 }}>
+        <span><i style={{ background: "#eb6834" }} />Group 1 integration (Week 7)</span>
+        <span><i style={{ background: "#2a78d6" }} />NLP models and processing</span>
+        <span><i style={{ background: "#1baf7a" }} />Trust and review</span>
+        <span><i style={{ background: "#0f1b2d" }} />Teacher</span>
       </div>
-      <div className="card pipe-detail">
-        <p className="metric-label">{chosen.stage}</p>
-        <h2 style={{ marginTop: 4 }}>{chosen.title}</h2>
-        <div className="section-label">What it does</div>
-        <p>{chosen.what}</p>
-        <div className="section-label">Why</div>
-        <p>{chosen.why}</p>
-        <div className="section-label">Measured</div>
-        <p>{chosen.number}</p>
-        <div className="section-label">Where in the code</div>
-        <p><code>{chosen.code}</code></p>
-        <p className="hint" style={{ marginTop: 14 }}>Click any step in the diagram to see its details.</p>
-      </div>
+    </div>
+  )
+}
+
+export function StepDetail({ step }) {
+  return (
+    <div key={step.key} className="card pipe-detail detail-swap">
+      <p className="metric-label">{step.stage}</p>
+      <h2 style={{ marginTop: 4 }}>{step.title}</h2>
+      <div className="section-label">What it does</div>
+      <p>{step.what}</p>
+      <div className="section-label">Why</div>
+      <p>{step.why}</p>
+      <div className="section-label">Measured</div>
+      <p>{step.number}</p>
+      <div className="section-label">Where in the code</div>
+      <p><code>{step.code}</code></p>
     </div>
   )
 }
@@ -278,12 +288,12 @@ export function AnswerPipeline({ result }) {
   return (
     <div className="answer-pipe">
       {items.map((item, position) => (
-        <div key={item.title} className="answer-pipe-cell">
+        <div key={item.title} className="answer-pipe-cell" style={{ "--i": position }}>
           <div className="answer-pipe-step" style={{ background: kindColours[item.kind].background, borderColor: kindColours[item.kind].border }}>
             <span className="answer-pipe-title" style={{ color: item.kind === "teacher" ? "#7fb2ee" : kindColours[item.kind].label }}>{item.title}</span>
             <span className="answer-pipe-value" style={{ color: item.kind === "teacher" ? "#ffffff" : "var(--ink)" }}>{item.value}</span>
           </div>
-          {position < items.length - 1 && <span className="answer-pipe-arrow">→</span>}
+          {position < items.length - 1 && <span className="answer-pipe-arrow"><i /></span>}
         </div>
       ))}
     </div>

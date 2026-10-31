@@ -59,3 +59,15 @@ def test_group1_page_is_graded_and_flagged(monkeypatch):
 def test_digitize_rejects_non_images():
     reply = client.post("/digitize", files={"image": ("notes.txt", io.BytesIO(b"hello"), "text/plain")})
     assert reply.status_code in [400, 503]
+
+
+def pretend_to_stop():
+    return None
+
+
+def test_shutdown_replies_and_is_not_documented(monkeypatch):
+    monkeypatch.setattr(api, "stop_this_process", pretend_to_stop)
+    reply = client.post("/shutdown")
+    assert reply.status_code == 200
+    assert reply.json()["stopping"] is True
+    assert "/shutdown" not in client.get("/openapi.json").json()["paths"]

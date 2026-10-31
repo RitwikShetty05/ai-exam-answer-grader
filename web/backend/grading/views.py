@@ -1,6 +1,12 @@
 import csv
 import json
 import os
+import sys
+import shutil
+import platform
+import threading
+import subprocess
+from importlib import metadata
 import requests
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse, FileResponse, Http404
@@ -9,7 +15,13 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 from .models import Exam, GradedAnswer
 
+if str(settings.SERVICE_FOLDER) not in sys.path:
+    sys.path.append(str(settings.SERVICE_FOLDER))
+import launcher
+
 IMAGE_TYPES = [".jpg", ".jpeg", ".png"]
+
+stack_packages = ["django", "fastapi", "uvicorn", "pydantic", "torch", "transformers", "numpy", "pandas", "scikit-learn", "requests", "whitenoise", "pytesseract", "jiwer", "pytest", "matplotlib", "plotly"]
 
 
 class GradingServiceError(Exception):
@@ -214,6 +226,8 @@ def grade_one(request):
         result = call_grading_service("/evaluate-answer", request_body)
     except GradingServiceError as error:
         return error_reply(error, 502)
+    if body.get("save") is False:
+        return JsonResponse({"id": None, "result": result})
     answer = save_result(result, "single answer", question_text=request_body["question_text"], answer_text=request_body["student_answer"], human_mark=number_or_none(body.get("human_mark")), ocr_confidence=request_body["ocr_confidence"])
     return JsonResponse({"id": answer.id, "result": result})
 
@@ -422,3 +436,129 @@ def evaluation(request):
             with open(path) as file:
                 week7[name] = list(csv.DictReader(file))
     return JsonResponse({"summary": summary, "week7": week7})
+
+
+def package_version(name):
+    try:
+        return metadata.version(name)
+    except metadata.PackageNotFoundError:
+        return None
+
+
+def tesseract_version():
+    program = shutil.which("tesseract")
+    if program is None:
+        return None
+    try:
+        reply = subprocess.run([program, "--version"], capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    words = (reply.stdout + reply.stderr).split()
+    if len(words) >= 2:
+        return words[1]
+    return None
+
+
+def ollama_version():
+    try:
+        reply = requests.get(settings.OLLAMA_URL + "/api/version", timeout=2)
+        return reply.json().get("version")
+    except (requests.exceptions.RequestException, ValueError):
+        return None
+
+
+@require_GET
+def tech_stack(request):
+    versions = {"python": platform.python_version()}
+    for name in stack_packages:
+        versions[name] = package_version(name)
+    package = read_json_file(settings.FRONTEND_PACKAGE_FILE) or {}
+    for group in ["dependencies", "devDependencies"]:
+        for name, version in package.get(group, {}).items():
+            versions[name] = version.lstrip("^~")
+    versions["ollama"] = ollama_version()
+    versions["tesseract"] = tesseract_version()
+    return JsonResponse({"versions": versions})
+
+
+def read_code_guide():
+    return read_json_file(settings.CODE_GUIDE_FILE) or {"groups": []}
+
+
+def guide_entry(path):
+    for group in read_code_guide().get("groups", []):
+        for item in group.get("files", []):
+            if item["path"] == path:
+                return item
+    return None
+
+
+def count_lines(path):
+    if not path.exists():
+        return 0
+    with open(path, encoding="utf-8") as file:
+        return len(file.read().splitlines())
+
+
+@require_GET
+def code_index(request):
+    groups = []
+    for group in read_code_guide().get("groups", []):
+        files = []
+        for item in group.get("files", []):
+            full_path = settings.SERVICE_FOLDER / item["path"]
+            files.append({
+                "path": item["path"],
+                "title": item.get("title", item["path"]),
+                "summary": item.get("summary", ""),
+                "language": item.get("language", ""),
+                "functions": len(item.get("explanations", {})),
+                "lines": count_lines(full_path),
+                "available": full_path.exists(),
+            })
+        groups.append({"name": group["name"], "about": group.get("about", ""), "files": files})
+    return JsonResponse({"groups": groups})
+
+
+@require_GET
+def code_file(request):
+    path = request.GET.get("path", "")
+    entry = guide_entry(path)
+    if entry is None:
+        return error_reply("This file is not part of the code tour.", 404)
+    full_path = settings.SERVICE_FOLDER / path
+    if not full_path.exists():
+        return error_reply("The file " + path + " was not found.", 404)
+    with open(full_path, encoding="utf-8") as file:
+        content = file.read()
+    return JsonResponse({
+        "path": path,
+        "title": entry.get("title", path),
+        "summary": entry.get("summary", ""),
+        "language": entry.get("language", ""),
+        "points": entry.get("points", []),
+        "explanations": entry.get("explanations", {}),
+        "content": content,
+    })
+
+
+def stop_web_app():
+    os._exit(0)
+
+
+@require_POST
+def shutdown(request):
+    stopped = []
+    try:
+        requests.post(settings.GRADING_API_URL + "/shutdown", timeout=5)
+        stopped.append("grading api")
+    except requests.exceptions.RequestException:
+        pass
+    launcher.forget("grading api")
+    if launcher.stop_ollama_if_started():
+        stopped.append("ollama")
+    ollama_left_running = "ollama" not in stopped and launcher.port_is_open(launcher.OLLAMA_PORT)
+    launcher.forget("web app")
+    threading.Timer(1.0, stop_web_app).start()
+    stopped.append("web app")
+    return JsonResponse({"stopped": stopped, "ollama_left_running": ollama_left_running})

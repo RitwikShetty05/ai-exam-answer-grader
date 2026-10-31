@@ -1,4 +1,5 @@
 import os
+import time
 import tempfile
 import threading
 from typing import Dict, List, Optional
@@ -175,6 +176,17 @@ def evaluate_batch(request: BatchRequest):
         if result["needs_human_review"]:
             needing_review = needing_review + 1
     return {"results": results, "answers_graded": len(results), "answers_needing_review": needing_review}
+
+
+def stop_this_process():
+    time.sleep(0.5)
+    os._exit(0)
+
+
+@app.post("/shutdown", include_in_schema=False)
+def shutdown():
+    threading.Thread(target=stop_this_process, daemon=True).start()
+    return {"stopping": True}
 
 
 @app.post("/digitize", summary="Read a scanned answer sheet page with Group 1's Handwritten Exam Digitizer")

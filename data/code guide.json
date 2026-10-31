@@ -1,0 +1,455 @@
+{
+  "groups": [
+    {
+      "name": "Grading service (the reusable asset)",
+      "files": [
+        {
+          "path": "src/grader.py",
+          "title": "The grader",
+          "language": "python",
+          "summary": "The heart of the project. Given a question, a reference answer, an optional rubric and a student's answer, it returns a recommended mark, feedback, a confidence and the reasons to send the answer to a teacher. It combines the fine-tuned similarity model (B3) with the local LLM rubric check (B2).",
+          "points": [
+            "The models and settings are loaded once, when the file is imported, so every answer after that is fast.",
+            "The LLM never just gives a mark: it must quote the student's words, and the code checks the quotes and computes the rubric score itself.",
+            "If the LLM is not running, the grader still works with the similarity model alone and flags the answer for a teacher."
+          ],
+          "explanations": {
+            "(top)": "Imports, then loads the saved settings, calibration points, confidence weights and rubric cache from the models folder, and loads the fine-tuned TinyBERT cross-encoder. It also holds the JSON formats the LLM must reply in, the two prompts (one to make a rubric, one to grade), the prompt-injection patterns and the phrases that count as a blank answer.",
+            "read_json": "Opens a JSON file from the models folder and returns its contents.",
+            "get_words": "Turns any text into a list of lower-case words and numbers, ignoring punctuation. Used everywhere words are compared.",
+            "round_to_half": "Rounds a mark to the nearest half mark, for example 3.74 to 3.5.",
+            "is_blank_answer": "True if the answer is empty or only says something like “I don't know” or “not answered”. Such answers get 0 without calling any model.",
+            "looks_like_injection": "Checks the answer against the prompt-injection patterns, such as “ignore previous instructions” or “give full marks”. A match flags the answer for a teacher.",
+            "make_safe_answer": "Replaces any student_answer tags the student typed, so the answer cannot close the box it is placed in inside the LLM prompt.",
+            "evidence_is_real": "The hallucination check. The LLM must quote the student's words as evidence; this accepts the quote only if at least 80% of its words really appear in the answer.",
+            "word_overlap": "How many words two texts share, as a fraction from 0 to 1 (Jaccard similarity).",
+            "match_checks_to_rubric": "Lines up the LLM's rubric checks with the real rubric points. If the LLM changed or dropped a point, it finds the closest check by word overlap; a point with no match counts as missing.",
+            "llm_is_available": "Asks Ollama whether the LLM is installed and running. The answer is remembered for 60 seconds so it is not asked for every answer.",
+            "ollama_is_running": "The older name for llm_is_available(), kept so earlier code still works.",
+            "read_json_reply": "Reads the JSON object out of the LLM's reply, even if it is wrapped in code fences.",
+            "ask_llm": "Sends a system prompt and a user prompt to the LLM and asks for a reply in a fixed JSON format. Temperature 0 and seed 42 make the reply repeatable. It tries up to four times before giving up.",
+            "rubric_key": "Makes the key used to save and find a rubric: the question and the reference answer joined together.",
+            "get_rubric": "Chooses the rubric: the teacher's if one is given, otherwise a saved one, otherwise asks the LLM to split the reference answer into 1 to 5 key points and saves them for a teacher to check.",
+            "similarity_score": "B3, the similarity model. Reads the reference answer and the student's answer together through the fine-tuned TinyBERT cross-encoder and turns its output into a mark from 0 to 5.",
+            "llm_grade": "B2, the LLM rubric check. Builds the grading prompt, asks the LLM for a status (present, partial or missing) and evidence for every rubric point, rejects evidence that is not in the answer, computes the rubric score (1 point present, 0.5 partial), takes off half a point per wrong statement, and returns the LLM's own score too.",
+            "calibrate": "Maps the average of the LLM's score and the rubric score onto the teachers' scale using the saved isotonic regression points. The LLM is much stricter than the teachers; this fixes the scale.",
+            "confidence_from_gaps": "The confidence. A logistic regression turns two disagreements (similarity model vs calibrated LLM, and LLM vs rubric) into the chance that the mark is within ±1 mark of a teacher's.",
+            "build_feedback": "Writes the feedback the student sees: which rubric points are covered, partly covered or missing, one wrong statement to check, and the LLM's short comment.",
+            "scale_score": "Converts a mark out of 5 to the question's real maximum, for example 3.5 / 5 to 7 / 10, rounded to half marks.",
+            "similarity_only_result": "The fallback result when the LLM cannot be used: the mark comes from the similarity model alone, the confidence is set low, and the answer is sent to a teacher.",
+            "evaluate_answer": "The main function. Runs the safety checks (low OCR confidence, injection text, long answer), gives 0 to blank answers, gets the similarity score, the rubric and the LLM check, calibrates, averages the two models, computes the confidence and the review reasons, and returns the full result.",
+            "evaluate_group1_record": "Grades one answer record in the course handout's Group 1 format (student_id, question, answer_text, page, confidence) using the answer key.",
+            "make_rubric": "Makes a rubric for a teacher to check, used by the API's /generate-rubric. It needs the LLM to be running."
+          }
+        },
+        {
+          "path": "src/group1.py",
+          "title": "Group 1 adapter",
+          "language": "python",
+          "summary": "Connects our grader to Group 1's Handwritten Exam Digitizer. Their digitizer returns one record per photographed page, with the student's name at the top; this file turns those pages into one clean answer per question and grades them.",
+          "points": [
+            "Group 1's code is used unchanged; this file only calls it and fixes up what it returns.",
+            "Question numbers are found even when the OCR misreads them, for example “QL.” or “@1]” for Q1."
+          ],
+          "explanations": {
+            "(top)": "Finds Group 1's project folder (next to this repository, or wherever GROUP1_DIGITIZER_PATH points) and holds the pattern that finds question numbers at the start of a line.",
+            "digitizer_available": "True only if Group 1's digitizer.py is present and the Tesseract OCR program is installed.",
+            "digitize": "Reads one photographed page with Group 1's digitize_page() and keeps only the useful fields of the entities their NER found.",
+            "question_label": "Turns a question number read by OCR into a clean label: letters that look like digits (l, i, | and o) are read as 1 and 0, so “QL” becomes Q1.",
+            "one_line": "Joins the lines of a text into one line with single spaces.",
+            "split_into_questions": "Splits a page's text where each question starts. Returns the text before the first question (usually the name header) and one part per question.",
+            "page_number_of": "The page number of a record, or its position in the list if the digitizer gave none.",
+            "pages_to_answers": "The adapter itself. Puts the pages in order, removes the header, splits pages that hold two questions, joins an answer that continues on the next page, keeps the lowest OCR confidence, and notes problems such as a missing student ID.",
+            "lowest": "The smaller of two OCR confidences, ignoring a missing one.",
+            "grade_pages": "Turns the pages into answers and grades each one with the grader. If the answer key has only one question and no question number was read, it grades the answer as that question and says so in the review reasons."
+          }
+        },
+        {
+          "path": "src/api.py",
+          "title": "The REST API",
+          "language": "python",
+          "summary": "Makes the grader a reusable service that any AI University application can call over HTTP. FastAPI checks every request against the classes at the top and writes the interactive documentation at /docs from them.",
+          "points": [
+            "Six documented endpoints: /health, /generate-rubric, /evaluate-answer, /evaluate-batch, /digitize and /evaluate-group1-pages.",
+            "A lock makes sure only one answer is graded at a time, because the LLM can only do one thing at once.",
+            "Run it with: cd src, then uvicorn api:app --port 8000."
+          ],
+          "explanations": {
+            "(top)": "Creates the FastAPI app with its title and description, and the lock that lets only one grading job run at a time.",
+            "AnswerRequest": "The request for grading one answer: question, reference answer, student's answer, maximum marks, and optional rubric, labels and OCR confidence.",
+            "RubricRequest": "The request for a suggested rubric: a question and its reference answer.",
+            "Group1Record": "One answer in the course handout's Group 1 format: student_id, question, answer_text, page and confidence.",
+            "AnswerKeyItem": "One question in an answer key: the question, the reference answer, the maximum marks and an optional rubric.",
+            "Group1Page": "One page exactly as Group 1's digitize_page() returns it, including the OCR confidence and the entities their NER found.",
+            "Group1PagesRequest": "All the pages of one student's answer sheet, the answer key, and the student ID typed by the teacher if the OCR could not read it.",
+            "BatchRequest": "An answer key plus many answers in the Group 1 format.",
+            "ConceptResult": "The result for one rubric point: the point, its status and the student's words as evidence.",
+            "GradeResult": "Everything the grader returns for one answer: score, feedback, confidence, review flag and reasons, rubric check, wrong statements and the component scores.",
+            "BatchResult": "The results of a batch, with how many answers were graded and how many need a teacher.",
+            "RubricResult": "A suggested rubric and where it came from (saved or generated).",
+            "health": "GET /health: says whether the service is ready, whether the LLM is running and whether Group 1's digitizer is installed.",
+            "generate_rubric": "POST /generate-rubric: suggests rubric points from a reference answer for a teacher to check.",
+            "evaluate_answer": "POST /evaluate-answer: grades one answer. Bad input gives error 400; an unavailable model gives 503.",
+            "evaluate_batch": "POST /evaluate-batch: grades many answers in the Group 1 format and counts how many need a teacher.",
+            "stop_this_process": "Waits half a second, so the reply can be sent, then stops this server.",
+            "shutdown": "POST /shutdown: used by the app's Shut down button. It is left out of the documentation because it is not part of the reusable API.",
+            "digitize": "POST /digitize: receives a photo of one page, saves it to a temporary file, reads it with Group 1's digitizer and deletes the file.",
+            "evaluate_group1_pages": "POST /evaluate-group1-pages: grades Group 1's page records exactly as their digitizer returns them, using the adapter in group1.py."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Web app backend (Django)",
+      "files": [
+        {
+          "path": "web/backend/grading/views.py",
+          "title": "Web app views",
+          "language": "python",
+          "summary": "Everything the browser asks the web app for. The views pass grading requests on to the grading API, save every result and every teacher decision in the database, and serve the review queue, the CSV export, the code tour, the tech stack versions and the shutdown.",
+          "points": [
+            "The browser never talks to the grading API directly; Django does, and stores every result.",
+            "The code tour only shows files listed in data/code guide.json, so no other file on the computer can be read through it."
+          ],
+          "explanations": {
+            "(top)": "Imports, the list of image types a scan can be, the launcher (shared with the start and stop scripts) and the packages whose versions the Tech stack page shows.",
+            "GradingServiceError": "The error raised when the grading API cannot be reached or returns an error.",
+            "call_grading_service": "Sends a request to the grading API (a GET, a JSON POST or a file upload) and returns its reply, or raises a clear error.",
+            "error_reply": "Sends an error message to the browser as JSON with an HTTP status code.",
+            "read_body": "Reads the JSON the browser sent, or returns None if it is not valid JSON.",
+            "read_json_file": "Reads a JSON file if it exists.",
+            "number_or_none": "Turns text such as “3.5” into a number, or None if it is empty or not a number.",
+            "exam_name": "The name of the exam an answer belongs to, or an empty string.",
+            "reviewed_time": "When the teacher reviewed the answer, as text, or None.",
+            "answer_to_dict": "Turns a saved answer into the JSON the review queue shows.",
+            "save_result": "Saves one grading result in the database as a GradedAnswer.",
+            "group1_samples": "Lists the sample page photos in Group 1's project.",
+            "index": "Serves the built React app, the page you are looking at.",
+            "csrf": "Sets the cookie that protects the app against requests from other websites.",
+            "status": "Asks the grading API for its health and counts the saved answers and the answers waiting for review. The sidebar shows this.",
+            "examples": "Sends the demo answers, the sample exam, the upload example and Group 1's answer key to the app.",
+            "generate_rubric": "Asks the grading API for a suggested rubric.",
+            "grade_one": "Grades one answer through the grading API and saves it. The pipeline page's demo run sends save: false so it does not fill the review queue.",
+            "grade_batch": "Grades a whole answer sheet, creates an Exam and saves every answer.",
+            "scan_pages": "Receives uploaded page photos and reads each one with Group 1's digitizer through the grading API.",
+            "scan_sample": "Reads one of Group 1's sample pages with their digitizer.",
+            "sample_image": "Sends one of Group 1's sample page photos to the browser.",
+            "grade_scan": "Grades the pages read by the digitizer (after the teacher checked the text) and saves each answer with its OCR confidence.",
+            "list_answers": "Lists the saved answers for the review queue, newest first.",
+            "review_answer": "Saves the teacher's mark and comment. A mark outside 0 to the maximum is refused.",
+            "remove_review": "Removes the teacher's review, so the answer goes back to the queue with its recommended mark.",
+            "delete_answer": "Deletes an answer that was graded by mistake.",
+            "export_answers": "Downloads every saved answer and decision as a CSV file.",
+            "evaluation": "Sends the saved evaluation results (Weeks 6 and 7) for the Evaluation results page.",
+            "package_version": "The installed version of a Python package, or None.",
+            "tesseract_version": "Runs tesseract --version to find the installed OCR version.",
+            "ollama_version": "Asks Ollama for its version.",
+            "tech_stack": "Collects the versions of Python, the Python packages, the frontend packages, Ollama and Tesseract for the Tech stack page.",
+            "read_code_guide": "Reads data/code guide.json, which lists the files of the code tour and their explanations.",
+            "guide_entry": "Finds one file in the code guide.",
+            "count_lines": "Counts the lines in a file.",
+            "code_index": "Lists the files of the code tour, grouped, with their line counts.",
+            "code_file": "Sends one file's code and its explanations. Only files listed in the guide can be opened.",
+            "stop_web_app": "Stops this Django server.",
+            "shutdown": "The Shut down button. Asks the grading API to stop, stops Ollama only if the start script started it, replies to the browser, and stops Django one second later."
+          }
+        },
+        {
+          "path": "web/backend/grading/models.py",
+          "title": "Database tables",
+          "language": "python",
+          "summary": "The two database tables. Every graded answer is stored with its recommended mark, its full result and the teacher's decision.",
+          "points": [
+            "The final mark is the teacher's mark if there is one, otherwise the recommended mark."
+          ],
+          "explanations": {
+            "Exam": "One graded answer sheet or scanned sheet, with its answer key.",
+            "GradedAnswer": "One graded answer: where it came from, the student and question, the answer text, the OCR confidence, the recommended mark and confidence, the full grader result, and the teacher's mark, comment and review time. final_mark() returns the teacher's mark if there is one."
+          }
+        },
+        {
+          "path": "web/backend/gradersite/urls.py",
+          "title": "Web app addresses",
+          "language": "python",
+          "summary": "Connects every address the browser can call (such as /api/grade or /api/answers) to the view in views.py that answers it.",
+          "points": [
+            "/ serves the React app; every address under /api/ returns JSON."
+          ],
+          "explanations": {
+            "(top)": "The list of addresses and the view that handles each one."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Web app frontend (React)",
+      "files": [
+        {
+          "path": "web/frontend/src/App.jsx",
+          "title": "The app frame",
+          "language": "javascript",
+          "summary": "The frame around every page: the sidebar with the tabs, the sliding highlight, the top bar with the live status, the page change animation, the click ripple and the Shut down button.",
+          "points": [
+            "The service status is checked every 20 seconds.",
+            "Every page fades and slides in when you change tabs."
+          ],
+          "explanations": {
+            "(top)": "Imports the pages and icons and lists the tabs in three groups: Grade, Teacher and Explore the project.",
+            "findPage": "Finds a tab and its group by its key, for the top bar.",
+            "addRipple": "The click effect: draws a circle that grows and fades from the point where a button was clicked.",
+            "StatusPanel": "The status lines in the sidebar: grading API, LLM, Group 1 digitizer and the number of saved answers.",
+            "StatusPills": "The small status pills in the top bar.",
+            "Clock": "The clock in the top bar.",
+            "ShutdownScreen": "The full-screen view shown while the app shuts down, ticking off each server as it stops.",
+            "App": "Loads the examples and results, checks the status, remembers the open tab, moves the sliding highlight, and shuts the app down after asking for confirmation."
+          }
+        },
+        {
+          "path": "web/frontend/src/api.js",
+          "title": "Talking to the backend",
+          "language": "javascript",
+          "summary": "The small functions every page uses to call the Django backend. After every action they show a short message in the corner (for example “Answer graded” or the error).",
+          "points": [
+            "Every POST request carries the CSRF token from the cookie, which Django requires."
+          ],
+          "explanations": {
+            "(top)": "The success message to show after each kind of request.",
+            "successMessage": "Finds the success message for an address.",
+            "readCookie": "Reads one cookie, here the CSRF token.",
+            "readReply": "Reads the JSON reply and turns an error reply into a clear error message.",
+            "sendAndAnnounce": "Sends a request and shows a success or error message in the corner.",
+            "getJson": "Fetches data from the backend.",
+            "postJson": "Sends JSON to the backend.",
+            "postForm": "Sends files, such as page photos, to the backend."
+          }
+        },
+        {
+          "path": "web/frontend/src/components/Pipeline.jsx",
+          "title": "The pipeline diagram",
+          "language": "javascript",
+          "summary": "The twelve steps of the grading pipeline with what each one does, why, what we measured and where it is in the code, the animated diagram, and the per-answer pipeline strip shown with every result.",
+          "points": [
+            "The same step data feeds the diagram, the guided tour and the step details."
+          ],
+          "explanations": {
+            "(top)": "The data for the twelve pipeline steps and the colours of each kind of step.",
+            "stepPosition": "The position of a step in the pipeline, used for the tour and the ticks.",
+            "StepBox": "One step in the diagram, with its glow when selected and a tick once the tour has passed it.",
+            "PipelineDiagram": "The whole diagram: the six stages, their steps and the animated arrows between them.",
+            "StepDetail": "The panel that explains the selected step.",
+            "round": "Rounds a number to two decimals.",
+            "AnswerPipeline": "The pipeline of one graded answer with its real values: checks, similarity score, LLM and rubric scores, calibrated score, final mark, confidence and decision."
+          }
+        },
+        {
+          "path": "web/frontend/src/pages/HowItWorks.jsx",
+          "title": "End-to-end pipeline page",
+          "language": "javascript",
+          "summary": "The page with the guided tour of the pipeline and the demo that sends a real answer through the grader.",
+          "points": [
+            "The tour moves to the next step every 2.4 seconds.",
+            "The demo run is not saved to the review queue."
+          ],
+          "explanations": {
+            "StageProgress": "The bar of the six stages that fills as the tour moves on.",
+            "LiveRun": "Sends one of the demo answers to the real grader, animates the stages while it waits, then shows the real result step by step.",
+            "HowItWorks": "The page itself: the play, pause and restart buttons, the diagram, the step details and the demo."
+          }
+        },
+        {
+          "path": "web/frontend/src/pages/TechStack.jsx",
+          "title": "Tech stack page",
+          "language": "javascript",
+          "summary": "Lists every tool the project uses, in six layers, with what it does, why we chose it and where it is in the code, and shows how the servers talk to each other.",
+          "points": [
+            "Version numbers come live from the backend's /api/stack."
+          ],
+          "explanations": {
+            "(top)": "The six layers and the list of tools.",
+            "layerOf": "Finds a layer by its key.",
+            "versionText": "The version to show on a tool's card.",
+            "Flow": "The diagram of the browser, Django, the grading API and Ollama, with live status dots.",
+            "TechStack": "The page itself: the totals, the diagram, the layer filter and the cards."
+          }
+        },
+        {
+          "path": "web/frontend/src/pages/CodeExplorer.jsx",
+          "title": "Code explorer page",
+          "language": "javascript",
+          "summary": "This page. It loads a file from the backend, splits it into functions, colours the code and puts the explanation of each function right above it.",
+          "points": [
+            "highlight.js colours the code; the explanations come from data/code guide.json."
+          ],
+          "explanations": {
+            "(top)": "Loads highlight.js with the languages the project uses.",
+            "definitionName": "Finds the name of a function or class defined on a line of Python or JavaScript.",
+            "splitIntoBlocks": "Splits a file into the top of the file and one block per function or class, keeping decorators such as @require_POST with their function.",
+            "humanise": "Turns a test name such as test_blank_answers into readable words.",
+            "explanationFor": "Finds the explanation of a block in the guide, with a general one for automated tests.",
+            "highlight": "Colours the code with highlight.js.",
+            "CodeBlock": "One function: its explanation, line numbers and coloured code.",
+            "CodeExplorer": "The page itself: the file list, search, outline, copy button and the code."
+          }
+        },
+        {
+          "path": "web/frontend/src/components/ui.jsx",
+          "title": "Shared interface pieces",
+          "language": "javascript",
+          "summary": "Small pieces used on many pages: the counting-up numbers, the confidence bar, badges, loading placeholders, the messages in the corner and the confirmation dialog.",
+          "points": [
+            "All animations switch off if the computer asks for reduced motion."
+          ],
+          "explanations": {
+            "prefersLessMotion": "True if the computer is set to reduce motion.",
+            "splitNumber": "Splits a value such as “4.5 / 5” into the number and the rest, so the number can count up.",
+            "CountUp": "Counts a number up from 0 when it appears.",
+            "Metric": "A box with a label, a counting-up value and a note.",
+            "ConfidenceBar": "The confidence bar that fills up, green, amber or red.",
+            "StatusBadge": "The present, partial or missing badge of a rubric point.",
+            "ReviewBadge": "The OK, review or reviewed badge in the review queue.",
+            "OcrBadge": "Shows the OCR confidence, in red below 80%.",
+            "Spinner": "The small spinning circle while something loads.",
+            "ErrorBanner": "A red error message.",
+            "Skeleton": "Shimmering placeholder blocks while a page loads.",
+            "showToast": "Shows a short message in the bottom corner.",
+            "toastIcon": "The icon of a message: a tick, a cross or an i.",
+            "Toasts": "Shows the messages and removes each one after about three seconds.",
+            "askConfirm": "Opens the confirmation dialog and waits for the answer.",
+            "ConfirmHost": "The confirmation dialog itself, which also closes with Escape."
+          }
+        },
+        {
+          "path": "web/frontend/src/pages/ReviewQueue.jsx",
+          "title": "Review queue page",
+          "language": "javascript",
+          "summary": "The teacher's page: every graded answer, its recommended mark and why it was flagged, with all teacher actions in one place: save or update the mark, remove a review, remove an answer, open the details and download the CSV.",
+          "points": [],
+          "explanations": {
+            "ReviewQueue": "Loads the saved answers, filters them (waiting, flagged or all), saves the teacher's marks and comments, removes reviews or answers after a confirmation, and shows the full result of an answer."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Start, stop and settings",
+      "files": [
+        {
+          "path": "launcher.py",
+          "title": "The launcher",
+          "language": "python",
+          "summary": "Starts and stops the whole app on Mac and Windows: Ollama (if it is not already running), the grading API and the web app. The start and stop files only call this file, and the Shut down button uses it to stop Ollama.",
+          "points": [
+            "It only stops Ollama if it started it; an Ollama you started yourself is left running.",
+            "The output of every server is written to the logs folder."
+          ],
+          "explanations": {
+            "(top)": "The folders, ports and the places where Ollama is usually installed.",
+            "port_is_open": "True if a server is listening on a port of this computer.",
+            "wait_for_port": "Waits until a port opens (or closes), up to a time limit.",
+            "pid_file": "The file that remembers the process number of a server the launcher started.",
+            "find_ollama": "Finds the ollama program.",
+            "missing_packages": "Lists the Python packages that are not installed.",
+            "start_process": "Starts a server in the background, writes its output to a log file and remembers its process number.",
+            "kill_process": "Stops a process: taskkill on Windows, a stop signal on Mac and Linux.",
+            "pids_on_port": "Finds the processes listening on a port (netstat on Windows, lsof on Mac).",
+            "read_pid": "Reads a remembered process number.",
+            "forget": "Deletes a remembered process number.",
+            "stop_ollama_if_started": "Stops Ollama only if the launcher started it.",
+            "stop_port": "Stops whatever is listening on a port.",
+            "show": "Prints a line straight away.",
+            "start_all": "Checks the packages, starts Ollama, the grading API and the web app, waits until they answer and opens the app in the browser.",
+            "stop_all": "Stops the web app and the grading API, and Ollama if the launcher started it."
+          }
+        },
+        {
+          "path": "Start Grader.command",
+          "title": "Start Grader (Mac)",
+          "language": "bash",
+          "summary": "Double-click on a Mac to start the app. It finds the conda environment “ml” (or python3) and runs launcher.py start.",
+          "points": [],
+          "explanations": {}
+        },
+        {
+          "path": "Stop Grader.command",
+          "title": "Stop Grader (Mac)",
+          "language": "bash",
+          "summary": "Double-click on a Mac to stop the app. It runs launcher.py stop.",
+          "points": [],
+          "explanations": {}
+        },
+        {
+          "path": "Start Grader.bat",
+          "title": "Start Grader (Windows)",
+          "language": "dos",
+          "summary": "Double-click on Windows to start the app. It finds the conda environment “ml” (or python) and runs launcher.py start.",
+          "points": [],
+          "explanations": {}
+        },
+        {
+          "path": "Stop Grader.bat",
+          "title": "Stop Grader (Windows)",
+          "language": "dos",
+          "summary": "Double-click on Windows to stop the app. It runs launcher.py stop.",
+          "points": [],
+          "explanations": {}
+        },
+        {
+          "path": "models/settings.json",
+          "title": "Grader settings",
+          "language": "json",
+          "summary": "The settings the grader reads when it starts.",
+          "points": [
+            "llm_model and ollama_address: which LLM to use and where Ollama answers.",
+            "cross_encoder_folder: where the fine-tuned similarity model is saved.",
+            "confidence_threshold_for_review (0.6): below this confidence an answer goes to a teacher.",
+            "llm_rubric_gap_for_review (2): if the LLM's score and the rubric score differ by this much or more, a teacher checks it.",
+            "ocr_confidence_threshold (0.8): below this OCR confidence the transcription must be checked."
+          ],
+          "explanations": {}
+        }
+      ]
+    },
+    {
+      "name": "Automated tests",
+      "files": [
+        {
+          "path": "tests/test_grader.py",
+          "title": "Grader tests",
+          "language": "python",
+          "summary": "Tests for the grader that run without the LLM: rounding, blank answers, injection patterns, the evidence check, calibration, long answers and the fallback when the LLM is down.",
+          "points": [],
+          "explanations": {}
+        },
+        {
+          "path": "tests/test_group1.py",
+          "title": "Group 1 adapter tests",
+          "language": "python",
+          "summary": "Tests for the Group 1 adapter: OCR mistakes in question numbers, header removal, missing student IDs and joining pages.",
+          "points": [],
+          "explanations": {}
+        },
+        {
+          "path": "tests/test_api.py",
+          "title": "API tests",
+          "language": "python",
+          "summary": "Tests for the REST API: health, wrong input, blank answers, unknown questions, Group 1 pages, non-image uploads and the shutdown endpoint.",
+          "points": [],
+          "explanations": {}
+        },
+        {
+          "path": "web/backend/grading/tests.py",
+          "title": "Web app tests",
+          "language": "python",
+          "summary": "Django tests for the teacher actions, the code tour, the tech stack and the shutdown button.",
+          "points": [],
+          "explanations": {
+            "ReviewTests": "Saving, refusing, removing and deleting teacher reviews, and listing the answers.",
+            "CodeTourTests": "The code tour lists its files, opens a listed file, and refuses any other path.",
+            "StackTests": "The Tech stack page gets the installed versions.",
+            "ShutdownTests": "The Shut down button stops the grading API and schedules the web app to stop, without really stopping anything during the test."
+          }
+        }
+      ]
+    }
+  ]
+}

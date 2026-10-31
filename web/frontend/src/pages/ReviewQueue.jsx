@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { getJson, postJson } from "../api.js"
 import ResultCard from "../components/ResultCard.jsx"
-import { ErrorBanner, OcrBadge, ReviewBadge, Spinner } from "../components/ui.jsx"
+import { ErrorBanner, OcrBadge, ReviewBadge, Spinner, askConfirm } from "../components/ui.jsx"
 
 export default function ReviewQueue({ reliability, onChanged }) {
   const [filter, setFilter] = useState("waiting")
@@ -48,7 +48,8 @@ export default function ReviewQueue({ reliability, onChanged }) {
 
   async function removeReview(answer) {
     const who = (answer.student_id || "this answer") + " " + (answer.question || "")
-    if (!window.confirm("Remove the teacher's review for " + who + "? The answer goes back to the queue with its recommended mark.")) {
+    const yes = await askConfirm({ title: "Remove this review?", message: "Remove the teacher's review for " + who + "? The answer goes back to the queue with its recommended mark.", confirmText: "Remove review", danger: true })
+    if (!yes) {
       return
     }
     try {
@@ -66,7 +67,8 @@ export default function ReviewQueue({ reliability, onChanged }) {
 
   async function removeAnswer(answer) {
     const who = (answer.student_id || "this answer") + " " + (answer.question || "")
-    if (!window.confirm("Remove " + who + " (" + answer.recommended_score + " / " + answer.maximum_score + ") from the queue? This deletes the graded answer and cannot be undone.")) {
+    const yes = await askConfirm({ title: "Remove this answer?", message: "Remove " + who + " (" + answer.recommended_score + " / " + answer.maximum_score + ") from the queue? This deletes the graded answer and cannot be undone.", confirmText: "Remove answer", danger: true })
+    if (!yes) {
       return
     }
     try {

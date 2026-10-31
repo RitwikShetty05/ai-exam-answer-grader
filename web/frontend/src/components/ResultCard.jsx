@@ -62,7 +62,7 @@ export default function ResultCard({ result, answerId, humanMark, reliability, o
   }
 
   return (
-    <div className="card">
+    <div className="card result-card">
       <div className="grid-4">
         <Metric label="Recommended mark" value={result.score + " / " + result.maximum_score} note="Advisory — the teacher decides" />
         <Metric label="Confidence" value={Math.round(result.confidence * 100) + "%"} note="Chance of being within ±1 mark of a teacher">

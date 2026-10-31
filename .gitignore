@@ -12,3 +12,5 @@ web/backend/static files/
 .pytest_cache/
 *.pdf
 !docs/**/*.pdf
+run/
+logs/

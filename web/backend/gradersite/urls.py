@@ -21,4 +21,8 @@ urlpatterns = [
     path("api/answers/<int:answer_id>/delete", views.delete_answer),
     path("api/answers.csv", views.export_answers),
     path("api/evaluation", views.evaluation),
+    path("api/stack", views.tech_stack),
+    path("api/code", views.code_index),
+    path("api/code/file", views.code_file),
+    path("api/shutdown", views.shutdown),
 ]
